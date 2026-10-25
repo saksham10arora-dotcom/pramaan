@@ -39,6 +39,7 @@ DATE_FORMATS = ("%d/%m/%Y", "%d-%m-%Y", "%d.%m.%Y", "%Y-%m-%d", "%d %B %Y", "%d 
 class Field:
     value: str
     line: str
+    source: str = "rule"  # "rule" for label matching, "ai" for a verified model reading
 
 
 def _squash(text: str) -> str:
@@ -79,6 +80,7 @@ def extract(doc_type: str, text: str) -> dict:
 
 
 def parse_date(s: str) -> date | None:
+    s = re.sub(r"(\d)(st|nd|rd|th)\b", r"\1", s.replace(",", ""))
     for fmt in DATE_FORMATS:
         try:
             return datetime.strptime(s.strip(), fmt).date()

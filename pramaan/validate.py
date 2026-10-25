@@ -5,9 +5,9 @@ from pathlib import Path
 import yaml
 from rapidfuzz import fuzz
 
-from . import forensics
+from . import forensics, llm
 from .docs import load
-from .extract import classify, extract, parse_date, parse_number
+from .extract import FIELDS, classify, extract, parse_date, parse_number
 
 NORMS = yaml.safe_load((Path(__file__).parent / "norms.yaml").read_text())
 PASS, FAIL, REVIEW = "PASS", "FAIL", "NEEDS REVIEW"
@@ -27,17 +27,29 @@ class Finding:
     evidence: list  # (document name, quoted line)
 
 
-def validate(files: dict, norms: dict = NORMS) -> list[Finding]:
-    """files maps file name -> path or bytes."""
+def validate(files: dict, norms: dict = NORMS, reader="auto") -> list[Finding]:
+    """files maps file name -> path or bytes. reader reads free-form text: llm.read by default when
+    a key is set, None for label matching only, or any callable with the same signature."""
+    if reader == "auto":
+        reader = llm.read if llm.available() else None
     docs, fields, findings = {}, {}, []
     for name, src in files.items():
         doc = load(src, name)
         kind = classify(doc.text)
+        found = extract(kind, doc.text) if kind else {}
+        if reader and (kind is None or len(found) < len(FIELDS[kind])):
+            ai_kind, ai_fields, unverified = reader(doc.text)
+            kind = kind or ai_kind
+            found = {**ai_fields, **found}  # a label match beats a model reading
+            for key, value, quote in unverified:
+                findings.append(Finding(f"unverified reading: {name}", REVIEW,
+                                        f"AI read {key} = \"{value}\" but that is not in the document" if value else quote,
+                                        [(name, quote)] if value else [(name, "")]))
         if kind is None:
             findings.append(Finding("document type", REVIEW, f"could not tell what {name} is", [(name, "")]))
             continue
         docs[kind] = doc
-        fields[kind] = extract(kind, doc.text)
+        fields[kind] = found
 
     def f(kind, key):
         return fields.get(kind, {}).get(key)
