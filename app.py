@@ -17,12 +17,12 @@ st.caption("AICTE application validation: checks every document against the norm
 
 left, right = st.columns([1, 2])
 with left:
-    uploads = st.file_uploader("Application documents (PDF)", type="pdf", accept_multiple_files=True)
-    demo = st.radio("or load a demo bundle", ["none", "clean", "forged"], horizontal=True)
+    uploads = st.file_uploader("Application documents (PDF or photo)", type=["pdf", "jpg", "jpeg", "png", "webp", "tif", "tiff"], accept_multiple_files=True)
+    demo = st.radio("or load a demo bundle", ["none", "clean", "forged", "forged_scan"], horizontal=True)
 
 files = {u.name: u.getvalue() for u in uploads or []}
 if not files and demo != "none":
-    files = {p.name: p.read_bytes() for p in sorted((SAMPLES / demo).glob("*.pdf"))}
+    files = {p.name: p.read_bytes() for p in sorted((SAMPLES / demo).iterdir()) if p.is_file()}
 if not files:
     st.info("Upload the documents of one application, or pick a demo bundle.")
     st.stop()
