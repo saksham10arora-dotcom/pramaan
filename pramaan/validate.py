@@ -121,6 +121,21 @@ def validate(files: dict, norms: dict = NORMS, reader="auto") -> list[Finding]:
                                 f"{have:,.0f} sq m built, {need:,.0f} sq m needed for this intake",
                                 [ev("building_completion", "built_up_sqm"), ev("application_form", "intake")]))
 
+    # a QR code printed by the issuer carries the certificate's own values; compare them with the page
+    for kind, doc in docs.items():
+        for payload in forensics.qr_payloads(doc):
+            coded = extract(kind, payload)
+            for key, qv in coded.items():
+                pv = fields[kind].get(key)
+                if not pv:
+                    continue
+                qd, pd = parse_date(qv.value), parse_date(pv.value)
+                same = (qd == pd) if qd and pd else same_name(qv.value, pv.value) >= norms["name_match_threshold"]
+                findings.append(Finding(f"QR code on {doc.name}: {key.replace('_', ' ')}", PASS if same else FAIL,
+                                        "QR code matches the printed text" if same else
+                                        f"QR code says \"{qv.value}\", the page says \"{pv.value}\": the page was altered",
+                                        [(doc.name, "QR: " + qv.line), (doc.name, pv.line)]))
+
     for kind, doc in docs.items():
         for hit in forensics.check(doc):
             findings.append(Finding(f"tampering: {doc.name}", REVIEW, f"{hit['check']}: {hit['detail']}", [(doc.name, "")]))
