@@ -1,0 +1,11 @@
+opencv-python-headless==5.0.0.93
+pillow==13.0.0
+pymupdf==2.0
+pytest==9.1.1
+PyYAML==6.0.3
+qrcode==8.2
+RapidFuzz==3.14.6
+reportlab==5.1.0
+requests==2.34.2
+streamlit==1.66.1
+rapidocr-onnxruntime==1.4.4

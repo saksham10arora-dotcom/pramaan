@@ -5,12 +5,18 @@ from pathlib import Path
 import yaml
 from rapidfuzz import fuzz
 
-from . import forensics
+from . import forensics, llm
 from .docs import load
-from .extract import classify, extract, parse_date, parse_number
+from .extract import FIELDS, classify, extract, parse_date, parse_number
 
 NORMS = yaml.safe_load((Path(__file__).parent / "norms.yaml").read_text())
 PASS, FAIL, REVIEW = "PASS", "FAIL", "NEEDS REVIEW"
+
+
+def same_name(a: str, b: str) -> float:
+    """0-100. Takes the better of word overlap and a spaceless compare, so OCR-merged words still match."""
+    a, b = a.lower(), b.lower()
+    return max(fuzz.token_set_ratio(a, b), fuzz.ratio(a.replace(" ", ""), b.replace(" ", "")))
 
 
 @dataclass
@@ -21,17 +27,29 @@ class Finding:
     evidence: list  # (document name, quoted line)
 
 
-def validate(files: dict, norms: dict = NORMS) -> list[Finding]:
-    """files maps file name -> path or bytes."""
+def validate(files: dict, norms: dict = NORMS, reader="auto") -> list[Finding]:
+    """files maps file name -> path or bytes. reader reads free-form text: llm.read by default when
+    a key is set, None for label matching only, or any callable with the same signature."""
+    if reader == "auto":
+        reader = llm.read if llm.available() else None
     docs, fields, findings = {}, {}, []
     for name, src in files.items():
         doc = load(src, name)
         kind = classify(doc.text)
+        found = extract(kind, doc.text) if kind else {}
+        if reader and (kind is None or len(found) < len(FIELDS[kind])):
+            ai_kind, ai_fields, unverified = reader(doc.text)
+            kind = kind or ai_kind
+            found = {**ai_fields, **found}  # a label match beats a model reading
+            for key, value, quote in unverified:
+                findings.append(Finding(f"unverified reading: {name}", REVIEW,
+                                        f"AI read {key} = \"{value}\" but that is not in the document" if value else quote,
+                                        [(name, quote)] if value else [(name, "")]))
         if kind is None:
             findings.append(Finding("document type", REVIEW, f"could not tell what {name} is", [(name, "")]))
             continue
         docs[kind] = doc
-        fields[kind] = extract(kind, doc.text)
+        fields[kind] = found
 
     def f(kind, key):
         return fields.get(kind, {}).get(key)
@@ -49,7 +67,7 @@ def validate(files: dict, norms: dict = NORMS) -> list[Finding]:
     for kind in ("building_completion", "fire_noc", "faculty_list"):
         other = f(kind, "institution")
         if inst and other:
-            score = fuzz.token_set_ratio(inst.value.lower(), other.value.lower())
+            score = same_name(inst.value, other.value)
             ok = score >= norms["name_match_threshold"]
             findings.append(Finding(f"institution name on {kind.replace('_', ' ')}", PASS if ok else FAIL,
                                     f"matches the application ({score:.0f}%)" if ok else
@@ -58,7 +76,7 @@ def validate(files: dict, norms: dict = NORMS) -> list[Finding]:
 
     trust, owner = f("application_form", "trust"), f("land_document", "owner")
     if trust and owner:
-        score = fuzz.token_set_ratio(trust.value.lower(), owner.value.lower())
+        score = same_name(trust.value, owner.value)
         ok = score >= norms["name_match_threshold"]
         findings.append(Finding("land owned by applicant trust", PASS if ok else FAIL,
                                 f"land is in the trust's name ({score:.0f}%)" if ok else
@@ -102,6 +120,21 @@ def validate(files: dict, norms: dict = NORMS) -> list[Finding]:
         findings.append(Finding("built-up area", PASS if have >= need else FAIL,
                                 f"{have:,.0f} sq m built, {need:,.0f} sq m needed for this intake",
                                 [ev("building_completion", "built_up_sqm"), ev("application_form", "intake")]))
+
+    # a QR code printed by the issuer carries the certificate's own values; compare them with the page
+    for kind, doc in docs.items():
+        for payload in forensics.qr_payloads(doc):
+            coded = extract(kind, payload)
+            for key, qv in coded.items():
+                pv = fields[kind].get(key)
+                if not pv:
+                    continue
+                qd, pd = parse_date(qv.value), parse_date(pv.value)
+                same = (qd == pd) if qd and pd else same_name(qv.value, pv.value) >= norms["name_match_threshold"]
+                findings.append(Finding(f"QR code on {doc.name}: {key.replace('_', ' ')}", PASS if same else FAIL,
+                                        "QR code matches the printed text" if same else
+                                        f"QR code says \"{qv.value}\", the page says \"{pv.value}\": the page was altered",
+                                        [(doc.name, "QR: " + qv.line), (doc.name, pv.line)]))
 
     for kind, doc in docs.items():
         for hit in forensics.check(doc):
