@@ -13,6 +13,12 @@ NORMS = yaml.safe_load((Path(__file__).parent / "norms.yaml").read_text())
 PASS, FAIL, REVIEW = "PASS", "FAIL", "NEEDS REVIEW"
 
 
+def same_name(a: str, b: str) -> float:
+    """0-100. Takes the better of word overlap and a spaceless compare, so OCR-merged words still match."""
+    a, b = a.lower(), b.lower()
+    return max(fuzz.token_set_ratio(a, b), fuzz.ratio(a.replace(" ", ""), b.replace(" ", "")))
+
+
 @dataclass
 class Finding:
     rule: str
@@ -49,7 +55,7 @@ def validate(files: dict, norms: dict = NORMS) -> list[Finding]:
     for kind in ("building_completion", "fire_noc", "faculty_list"):
         other = f(kind, "institution")
         if inst and other:
-            score = fuzz.token_set_ratio(inst.value.lower(), other.value.lower())
+            score = same_name(inst.value, other.value)
             ok = score >= norms["name_match_threshold"]
             findings.append(Finding(f"institution name on {kind.replace('_', ' ')}", PASS if ok else FAIL,
                                     f"matches the application ({score:.0f}%)" if ok else
@@ -58,7 +64,7 @@ def validate(files: dict, norms: dict = NORMS) -> list[Finding]:
 
     trust, owner = f("application_form", "trust"), f("land_document", "owner")
     if trust and owner:
-        score = fuzz.token_set_ratio(trust.value.lower(), owner.value.lower())
+        score = same_name(trust.value, owner.value)
         ok = score >= norms["name_match_threshold"]
         findings.append(Finding("land owned by applicant trust", PASS if ok else FAIL,
                                 f"land is in the trust's name ({score:.0f}%)" if ok else

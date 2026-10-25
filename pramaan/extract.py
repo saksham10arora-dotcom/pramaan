@@ -41,17 +41,26 @@ class Field:
     line: str
 
 
+def _squash(text: str) -> str:
+    """Lowercase, no spaces, and the letter confusions OCR makes most (l/I, 0/O in words)."""
+    return re.sub(r"\s+", "", text.lower()).replace("l", "i")
+
+
 def classify(text: str) -> str | None:
-    t = text.lower()
-    if "fire" in t and ("no objection" in t or "noc" in t):
+    t = _squash(text)
+
+    def has(*words):
+        return all(_squash(w) in t for w in words)
+
+    if has("fire") and (has("no objection") or has("noc")):
         return "fire_noc"
-    if "building completion" in t or "occupancy certificate" in t:
+    if has("building completion") or has("occupancy certificate"):
         return "building_completion"
-    if "faculty" in t and "list" in t:
+    if has("faculty", "list"):
         return "faculty_list"
-    if "land" in t and ("deed" in t or "registry" in t or "ownership" in t):
+    if has("land") and (has("deed") or has("registry") or has("ownership")):
         return "land_document"
-    if "application" in t and "aicte" in t:
+    if has("application", "aicte"):
         return "application_form"
     return None
 
@@ -60,7 +69,9 @@ def extract(doc_type: str, text: str) -> dict:
     out = {}
     for key, labels in FIELDS.get(doc_type, {}).items():
         for label in labels:
-            m = re.search(rf"^\s*{re.escape(label)}\s*[:\-]\s*(.+?)\s*$", text, re.I | re.M)
+            # OCR drops spaces, so every gap in the label is optional
+            pattern = r"\s*".join(re.escape(c) for c in label.replace(" ", ""))
+            m = re.search(rf"^\s*{pattern}\s*[:\-]\s*(.+?)\s*$", text, re.I | re.M)
             if m:
                 out[key] = Field(m.group(1), m.group(0).strip())
                 break

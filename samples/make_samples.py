@@ -59,3 +59,16 @@ if __name__ == "__main__":
     bundle(root / "forged", land_owner="Rajesh Kumar Gupta", fire_valid="31/03/2026")
     forge_fire_noc(root / "forged" / "fire_noc.pdf")
     print(f"wrote {root}/clean and {root}/forged")
+
+
+def scan(pdf_path: Path, out_path: Path, dpi=150):
+    """Turn a PDF into what a scanner produces: a page image with no text layer."""
+    src = pymupdf.open(pdf_path)
+    pix = src[0].get_pixmap(dpi=dpi)
+    if out_path.suffix.lower() in (".jpg", ".jpeg", ".png"):
+        pix.save(out_path)
+        return
+    dst = pymupdf.open()
+    page = dst.new_page(width=src[0].rect.width, height=src[0].rect.height)
+    page.insert_image(page.rect, pixmap=pix)
+    dst.save(out_path)
