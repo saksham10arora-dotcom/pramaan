@@ -15,6 +15,17 @@ NORMS = yaml.safe_load((Path(__file__).parent / "norms.yaml").read_text())
 PASS, FAIL, REVIEW = "PASS", "FAIL", "NEEDS REVIEW"
 
 
+# a rule with no value to check would be skipped, so an unreadable field must never reach COMPLIANT
+KEY_FIELDS = {
+    "application_form": ["institution", "trust", "programme", "courses", "intake_per_year", "duration", "application_date"],
+    "land_document": ["owner"],
+    "land_use_certificate": ["owner"],
+    "building_completion": ["institution", "built_up_sqm"],
+    "fire_noc": ["institution", "valid_until"],
+    "faculty_list": ["institution"],
+}
+
+
 def same_name(a: str, b: str) -> float:
     """0-100. Takes the better of word overlap and a spaceless compare, so OCR-merged words still match."""
     a, b = a.lower(), b.lower()
@@ -102,6 +113,12 @@ def analyse(files: dict, norms: dict = NORMS, reader="auto", registry=None) -> R
     missing = [k for k in norms["required_documents"] if k not in docs]
     findings.append(Finding("required documents", FAIL if missing else PASS,
                             "missing: " + ", ".join(missing) if missing else "all required documents present", []))
+
+    for kind, keys in KEY_FIELDS.items():
+        unread = [k.replace("_", " ") for k in keys if kind in docs and not f(kind, k)]
+        if unread:
+            findings.append(Finding(f"unreadable fields: {docs[kind].name}", REVIEW, "could not read: " + ", ".join(unread),
+                                    [(docs[kind].name, "")]))
 
     inst = f("application_form", "institution")
     for kind in ("building_completion", "fire_noc", "faculty_list"):
@@ -216,16 +233,17 @@ def analyse(files: dict, norms: dict = NORMS, reader="auto", registry=None) -> R
     documents = [{"name": d.name, "kind": k, "sha256": d.sha256,
                   "cert_no": fields[k]["cert_no"].value if "cert_no" in fields[k] else ""} for k, d in docs.items()]
     if registry:
+        bundle = registry.bundle_key(documents)
         elsewhere = lambda who: institution and same_name(who, institution) < norms["name_match_threshold"]
         for d in documents:
-            hits = [r for r in registry.document_elsewhere(d["sha256"], d["cert_no"]) if elsewhere(r["institution"])]
+            hits = [r for r in registry.document_elsewhere(d["sha256"], d["cert_no"], bundle) if elsewhere(r["institution"])]
             if hits:
                 what = "the same file" if hits[0]["same_file"] else f"certificate number {d['cert_no']}"
                 findings.append(Finding(f"reused document: {d['name']}", FAIL,
                                         f"{what} was already submitted by {hits[0]['institution']}", [(d["name"], d["cert_no"])]))
         shared = {}  # one row per person, however many times the other institution submitted
         for i, n in rows:
-            for r in registry.faculty_elsewhere(i):
+            for r in registry.faculty_elsewhere(i, bundle):
                 if elsewhere(r["institution"]):
                     shared[i] = (i, n, r["institution"])
         shared = list(shared.values())
@@ -233,5 +251,5 @@ def analyse(files: dict, norms: dict = NORMS, reader="auto", registry=None) -> R
             shown = ", ".join(f"{n} ({i})" for i, n, _ in shared[:3])
             findings.append(Finding("faculty at another institution", FAIL,
                                     f"{len(shared)} faculty are also listed by {shared[0][2]}, for example {shown}",
-                                    [(docs["faculty_list"].name, f"{i} {n}") for i, n, _ in shared[:5]]))
+                                    [(docs["faculty_list"].name, f"{i} {n}") for i, n, _ in shared[:3]]))
     return Report(findings, institution, documents, rows)

@@ -19,27 +19,39 @@ class Registry:
         self.db.row_factory = sqlite3.Row
         self.db.executescript(SCHEMA)
 
-    def document_elsewhere(self, sha256, cert_no):
+    @staticmethod
+    def bundle_key(documents) -> str:
+        return "".join(sorted(d["sha256"] for d in documents))
+
+    def _order(self, bundle) -> int:
+        """Only earlier applications count: re-checking the original must not blame it for a later copy."""
+        row = self.db.execute("SELECT id FROM applications WHERE bundle = ?", (bundle,)).fetchone()
+        return row["id"] if row else 1 << 62
+
+    def document_elsewhere(self, sha256, cert_no, bundle=""):
         return self.db.execute(
             "SELECT a.institution, d.name, d.sha256 = ? AS same_file FROM documents d JOIN applications a ON a.id = d.app "
-            "WHERE d.sha256 = ? OR (d.cert_no != '' AND d.cert_no = ?)", (sha256, sha256, cert_no or "")).fetchall()
+            "WHERE (d.sha256 = ? OR (d.cert_no != '' AND d.cert_no = ?)) AND a.id < ?",
+            (sha256, sha256, cert_no or "", self._order(bundle))).fetchall()
 
-    def faculty_elsewhere(self, faculty_id):
+    def faculty_elsewhere(self, faculty_id, bundle=""):
         return self.db.execute("SELECT a.institution, f.name FROM faculty f JOIN applications a ON a.id = f.app "
-                               "WHERE f.faculty_id = ?", (faculty_id,)).fetchall()
+                               "WHERE f.faculty_id = ? AND a.id < ?", (faculty_id, self._order(bundle))).fetchall()
 
     def record(self, report) -> int:
-        bundle = "".join(sorted(d["sha256"] for d in report.documents))
+        bundle = self.bundle_key(report.documents)
+        values = (report.institution, report.verdict, report.count("FAIL"), report.count("NEEDS REVIEW"),
+                  report.count("PASS"), json.dumps(report.to_dict()))
         old = self.db.execute("SELECT id FROM applications WHERE bundle = ?", (bundle,)).fetchone()
-        if old:
-            self.db.execute("DELETE FROM documents WHERE app = ?", (old["id"],))
-            self.db.execute("DELETE FROM faculty WHERE app = ?", (old["id"],))
-            self.db.execute("DELETE FROM applications WHERE id = ?", (old["id"],))
-        cur = self.db.execute(
-            "INSERT INTO applications (bundle, institution, verdict, failed, review, passed, report) VALUES (?,?,?,?,?,?,?)",
-            (bundle, report.institution, report.verdict, report.count("FAIL"), report.count("NEEDS REVIEW"),
-             report.count("PASS"), json.dumps(report.to_dict())))
-        app = cur.lastrowid
+        if old:  # a re-check keeps its place in the order of submission
+            app = old["id"]
+            self.db.execute("UPDATE applications SET institution=?, verdict=?, failed=?, review=?, passed=?, report=? WHERE id=?",
+                            (*values, app))
+            self.db.execute("DELETE FROM documents WHERE app = ?", (app,))
+            self.db.execute("DELETE FROM faculty WHERE app = ?", (app,))
+        else:
+            app = self.db.execute("INSERT INTO applications (institution, verdict, failed, review, passed, report, bundle) "
+                                  "VALUES (?,?,?,?,?,?,?)", (*values, bundle)).lastrowid
         self.db.executemany("INSERT INTO documents VALUES (?,?,?,?)",
                             [(app, d["sha256"], d["name"], d.get("cert_no", "")) for d in report.documents])
         self.db.executemany("INSERT INTO faculty VALUES (?,?,?)", [(app, i, n) for i, n in report.faculty])

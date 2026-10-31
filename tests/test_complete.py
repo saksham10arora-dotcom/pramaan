@@ -37,6 +37,14 @@ def test_no_norm_means_a_human_decides(tmp_path):
     assert rule(validate(files(tmp_path)), "student to faculty")[0].status == REVIEW
 
 
+def test_unreadable_key_field_never_reaches_compliant(tmp_path):
+    bundle(tmp_path)
+    write(tmp_path / "fire_noc.pdf", "Fire Safety Certificate", ["Name of Premises: Shree Ram Institute of Technology"])
+    report = analyse(files(tmp_path))
+    assert report.verdict == "SEND TO A HUMAN REVIEWER"
+    assert "valid until" in rule(report.findings, "unreadable fields")[0].reason
+
+
 def test_old_building_needs_structural_certificate(tmp_path):
     bundle(tmp_path)
     write(tmp_path / "building_completion.pdf", "Building Completion Certificate", [
@@ -85,6 +93,16 @@ def test_each_ghost_is_counted_once_across_resubmissions(tmp_path):
         reg.record(analyse(files(tmp_path / str(i)), registry=reg))
     ghost(tmp_path / "b")
     assert "25 faculty" in rule(analyse(files(tmp_path / "b"), registry=reg).findings, "faculty at another")[0].reason
+
+
+def test_rechecking_the_original_does_not_blame_it_for_a_later_copy(tmp_path):
+    reg = Registry()
+    bundle(tmp_path / "a")
+    reg.record(analyse(files(tmp_path / "a"), registry=reg))
+    ghost(tmp_path / "b")
+    reg.record(analyse(files(tmp_path / "b"), registry=reg))
+    assert analyse(files(tmp_path / "a"), registry=reg).verdict == "COMPLIANT"
+    assert analyse(files(tmp_path / "b"), registry=reg).verdict.startswith("REJECT")
 
 
 def test_resubmission_by_the_same_institution_is_not_a_clash(tmp_path):
