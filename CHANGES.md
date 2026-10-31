@@ -10,3 +10,13 @@ Every change from the prototype on, newest last.
 - **Editing-software trace.** PDF producer/creator and image EXIF Software naming a known editor (iLovePDF, Photoshop, Canva, ...) goes to review.
 - **Tried and dropped: error level analysis on photos.** On rendered documents it scored a pasted date the same as an innocent re-save, so it is not shipped. Listed as an open drawback.
 - Structured README for teammates (problem statement, done, remaining, drawbacks, run steps); requirements.txt; app accepts photos and has the forged_scan demo.
+
+## 2026-10-31
+- **Real norms.** Replaced the placeholders with the AICTE Approval Process Handbook 2024-27: faculty ratio by programme and built-up area room by room. Removed the 2.5-acre land rule: the handbook has no fixed minimum and sets land by FSI/FAR. Sample applications updated.
+- **Registry.** SQLite record across applications: reused files, certificate numbers, ghost faculty. Only earlier applications count against an application.
+- **Faculty rows** read from the list; repeated IDs and a total that disagrees with the names fail.
+- **Digital signature check** with pyHanko (integrity only). Structural stability rule. Land use certificate added. Second document of one type goes to review.
+- **Unreadable key fields go to a human.** Previously the rule skipped silently and a bad scan could reach COMPLIANT.
+- **REST API, PDF report, reviewer queue.**
+- **Deck and demo video** with script, in `docs/`.
+- **Dropped:** issuer verification, CCA root check, Hindi OCR, error level analysis. Reasons in the README.

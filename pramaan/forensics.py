@@ -1,4 +1,5 @@
 """Signs that a PDF was edited after it was issued. Each check returns findings, never a verdict on its own."""
+import io
 import re
 
 import cv2
@@ -20,7 +21,6 @@ def editor_trace(doc: Document) -> str | None:
     if doc.is_image:
         try:
             from PIL import Image
-            import io
             exif = Image.open(io.BytesIO(doc.raw)).getexif()
             tags += [str(exif.get(0x0131, "")), str(exif.get(0x000B, ""))]  # Software, ProcessingSoftware
         except Exception:
@@ -42,13 +42,32 @@ def qr_payloads(doc: Document) -> list[str]:
     return out
 
 
+def signatures(doc: Document) -> list[dict]:
+    """Check embedded digital signatures. Integrity only: India's CCA root list is not loaded,
+    so a good result means "unchanged since signing", not "signed by the right office"."""
+    if doc.is_image or not doc.signed:
+        return []
+    from pyhanko.pdf_utils.reader import PdfFileReader
+    from pyhanko.sign.diff_analysis import ModificationLevel
+    from pyhanko.sign.validation import validate_pdf_signature
+    from pyhanko_certvalidator import ValidationContext
+
+    out = []
+    for sig in PdfFileReader(io.BytesIO(doc.raw), strict=False).embedded_signatures:
+        st = validate_pdf_signature(sig, ValidationContext(allow_fetching=False))
+        who = st.signing_cert.subject.human_friendly if st.signing_cert else "unknown"
+        ok = st.intact and st.valid and st.modification_level in (ModificationLevel.NONE, ModificationLevel.LTA_UPDATES)
+        out.append({"ok": ok, "signer": who})
+    return out
+
+
 def check(doc: Document) -> list[dict]:
     found = []
     tool = editor_trace(doc)
     if tool:
         found.append({"check": "editing software", "detail": f"file was last written by \"{tool}\""})
     eofs = doc.raw.count(b"%%EOF")
-    if eofs > 1:
+    if eofs > 1 and not doc.signed:  # signing itself appends to the file; the signature check covers those
         found.append({"check": "incremental save",
                       "detail": f"file was saved {eofs - 1} more time(s) after it was first written"})
 
