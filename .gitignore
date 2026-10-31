@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 samples/out/
 .pytest_cache/
+data/

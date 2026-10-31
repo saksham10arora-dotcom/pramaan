@@ -38,7 +38,7 @@ def test_too_few_faculty_fails_ratio(tmp_path):
     write(tmp_path / "faculty_list.pdf", "Faculty List 2026-27",
           ["Name of Institution: Shree Ram Institute of Technology", "Total Faculty: 10"])
     f = by_rule(run(tmp_path), "student to faculty")[0]
-    assert f.status == FAIL and "at least 15" in f.reason
+    assert f.status == FAIL and "at least 24" in f.reason
 
 
 def test_missing_document_fails(tmp_path):

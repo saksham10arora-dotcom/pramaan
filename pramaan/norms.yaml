@@ -1,6 +1,22 @@
-# Demo values. Replace with the figures from the AICTE Approval Process Handbook for the cycle being checked.
-required_documents: [application_form, land_document, building_completion, fire_noc, faculty_list]
-max_student_faculty_ratio: 20
-built_up_sqm_per_student: 10
-min_land_acres: 2.5
-name_match_threshold: 85   # rapidfuzz token_set_ratio, 0-100
+# Source: AICTE Approval Process Handbook 2024-25 to 2026-27. Page numbers are the handbook's printed pages.
+source: AICTE Approval Process Handbook 2024-2027
+required_documents:
+  - application_form
+  - land_document        # ownership or lease document
+  - land_use_certificate # Land Use / Conversion / Classification Certificate, clause 6.17(e)
+  - building_completion  # Occupancy or Completion Certificate, Annexure 3.1(c)
+  - fire_noc             # Fire and Life Safety Certificate, Annexure 3.1(d)
+  - faculty_list
+# Annexure 5.2, UG degree, p.95. Students are the approved intake across all years.
+faculty_ratio:
+  engineering and technology: 20
+  planning: 16
+  applied arts and crafts: 15
+  design: 15
+  hotel management and catering technology: 20
+  computer applications: 25
+  management: 25
+# Clause 6.17(h), p.57: Structural Stability Certificate after 30 years, valid 5 years.
+structural_after_years: 30
+structural_valid_years: 5
+name_match_threshold: 85   # our matching setting, not an AICTE norm

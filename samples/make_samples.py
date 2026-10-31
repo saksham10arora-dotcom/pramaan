@@ -1,4 +1,4 @@
-"""Write two fictional application bundles: a clean one and one with a forged fire NOC and a land mismatch."""
+"""Write fictional application bundles for the demo. No institution, person or number here is real."""
 import shutil
 import sys
 from pathlib import Path
@@ -25,29 +25,46 @@ def write(path, title, lines, qr=None):
     c.setFont("Helvetica-Bold", 15)
     c.drawString(60, 780, title)
     c.setFont("Helvetica", 11)
-    y = 740
+    y, step = 740, 24 if len(lines) < 15 else 22
     for line in lines:
         c.drawString(60, y, line)
-        y -= 24
+        y -= step
     c.save()
 
 
-def bundle(out: Path, land_owner=TRUST, fire_valid="31/03/2027"):
+FIRST = "Asha Vikram Neha Rohan Priya Arjun Kavita Manish Sunita Deepak Anjali Rahul Meena Sanjay Pooja".split()
+LAST = "Sharma Verma Iyer Nair Das Khan Joshi Reddy Bose Malhotra".split()
+
+
+def staff(n=25):
+    """Fictional faculty rows; the names and IDs do not belong to anyone."""
+    return [f"{i + 1}. Dr. {FIRST[i % 15]} {LAST[i % 10]} | 1-10000{i + 101:05d}" for i in range(n)]
+
+
+def bundle(out: Path, land_owner=TRUST, fire_valid="31/03/2027", inst=INST, trust=TRUST, addr=ADDR,
+           faculty=None, built="6,000", noc_no="DFS/NOC/2026/0417"):
     out.mkdir(parents=True, exist_ok=True)
+    faculty = staff() if faculty is None else faculty
+    land_owner = trust if land_owner == TRUST else land_owner
     write(out / "application_form.pdf", "AICTE Application for Extension of Approval 2026-27", [
-        f"Name of Institution: {INST}", f"Name of Society/Trust: {TRUST}", f"Address: {ADDR}",
-        "Total Approved Intake: 300", "Date of Application: 15/09/2026"])
+        f"Name of Institution: {inst}", f"Name of Society/Trust: {trust}", f"Address: {addr}",
+        "Programme: Engineering and Technology", "Number of Courses: 2", "Intake per Year: 120",
+        "Duration (years): 4", "Date of Application: 15/09/2026"])
     write(out / "land_document.pdf", "Land Ownership Deed (Registry Copy)", [
-        f"Name of Owner: {land_owner}", f"Property Address: {ADDR}", "Land Area (acres): 3.0",
-        "Registration No: DL-RH-2009-44812"])
+        f"Name of Owner: {land_owner}", f"Property Address: {addr}", "Land Area (acres): 3.0",
+        f"Registration No: DL-RH-2009-{len(inst) * 977}" if inst != INST else "Registration No: DL-RH-2009-44812"])
+    write(out / "land_use_certificate.pdf", "Land Use Certificate", [
+        f"Issued to: {land_owner}", "Permitted Use: Educational Institution",
+        f"Certificate No: LUC/{'2011' if inst == INST else '2014'}/{len(inst)}8821", "Issued by: Delhi Development Authority"])
     write(out / "building_completion.pdf", "Building Completion Certificate", [
-        f"Issued to: {INST}", "Built-up Area (sq m): 3,200", "Issuing Authority: Municipal Corporation of Delhi"])
+        f"Issued to: {inst}", f"Built-up Area (sq m): {built}", "Date of Issue: 12/06/2012",
+        f"Certificate No: MCD/BCC/2012/{len(inst)}733", "Issuing Authority: Municipal Corporation of Delhi"])
     write(out / "fire_noc.pdf", "Fire Safety No Objection Certificate (NOC)", [
-        f"Name of Premises: {INST}", f"Address of Premises: {ADDR}", f"Valid Until: {fire_valid}",
-        "Issued by: Delhi Fire Service", "Certificate No: DFS/NOC/2026/0417"],
-        qr=f"Certificate No: DFS/NOC/2026/0417\nName of Premises: {INST}\nValid Until: {fire_valid}")
+        f"Name of Premises: {inst}", f"Address of Premises: {addr}", f"Valid Until: {fire_valid}",
+        "Issued by: Delhi Fire Service", f"Certificate No: {noc_no}"],
+        qr=f"Certificate No: {noc_no}\nName of Premises: {inst}\nValid Until: {fire_valid}")
     write(out / "faculty_list.pdf", "Faculty List 2026-27", [
-        f"Name of Institution: {INST}", "Total Faculty: 16"])
+        f"Name of Institution: {inst}", f"Total Faculty: {len(faculty)}", *faculty])
 
 
 def forge_fire_noc(path: Path, new_date="31/03/2027"):
@@ -84,4 +101,7 @@ if __name__ == "__main__":
     forge_fire_noc(root / "forged_scan" / "fire_noc.pdf")
     scan(root / "forged_scan" / "fire_noc.pdf", root / "forged_scan" / "fire_noc.jpg")
     (root / "forged_scan" / "fire_noc.pdf").unlink()
-    print(f"wrote {root}/clean and {root}/forged")
+    # a second college borrowing the first one's faculty and fire certificate number
+    bundle(root / "ghost", inst="Ganga College of Engineering", trust="Ganga Vidya Trust",
+           addr="Khasra 212, Sonipat Road, Haryana 131001")
+    print(f"wrote clean, forged, forged_scan and ghost to {root}")

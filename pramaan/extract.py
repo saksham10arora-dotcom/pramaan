@@ -9,22 +9,37 @@ FIELDS = {
         "institution": ["Name of Institution", "Institution Name"],
         "trust": ["Name of Society/Trust", "Applicant Trust", "Society/Trust"],
         "address": ["Address", "Institution Address"],
-        "intake": ["Total Approved Intake", "Total Intake", "Proposed Intake"],
+        "programme": ["Programme"],
+        "courses": ["Number of Courses"],
+        "intake_per_year": ["Intake per Year", "Annual Intake"],
+        "duration": ["Duration (years)", "Course Duration"],
         "application_date": ["Date of Application", "Application Date"],
     },
     "land_document": {
         "owner": ["Name of Owner", "Owner", "In the name of"],
         "address": ["Property Address", "Address"],
-        "area_acres": ["Land Area (acres)", "Area in Acres"],
+        "cert_no": ["Registration No"],
+    },
+    "land_use_certificate": {
+        "owner": ["Issued to", "Name of Applicant"],
+        "land_use": ["Permitted Use", "Land Use"],
+        "cert_no": ["Certificate No"],
     },
     "building_completion": {
         "institution": ["Name of Institution", "Issued to"],
         "built_up_sqm": ["Built-up Area (sq m)", "Total Built-up Area"],
+        "issue_date": ["Date of Issue", "Issue Date"],
+        "cert_no": ["Certificate No"],
+    },
+    "structural_stability": {
+        "issue_date": ["Date of Issue", "Issue Date"],
+        "cert_no": ["Certificate No"],
     },
     "fire_noc": {
         "institution": ["Name of Premises", "Name of Institution"],
         "valid_until": ["Valid Until", "Validity", "Valid upto"],
         "address": ["Address of Premises", "Address"],
+        "cert_no": ["Certificate No"],
     },
     "faculty_list": {
         "institution": ["Name of Institution"],
@@ -53,7 +68,11 @@ def classify(text: str) -> str | None:
     def has(*words):
         return all(_squash(w) in t for w in words)
 
-    if has("fire") and (has("no objection") or has("noc")):
+    if has("structural stability"):
+        return "structural_stability"
+    if has("land use") or has("land conversion"):
+        return "land_use_certificate"
+    if has("fire") and (has("no objection") or has("noc") or has("safety certificate")):
         return "fire_noc"
     if has("building completion") or has("occupancy certificate"):
         return "building_completion"
@@ -77,6 +96,17 @@ def extract(doc_type: str, text: str) -> dict:
                 out[key] = Field(m.group(1), m.group(0).strip())
                 break
     return out
+
+
+def faculty_rows(text: str) -> list[tuple]:
+    """(faculty id, name) for every row of a faculty list. AICTE faculty IDs look like 1-1000000123."""
+    rows = []
+    for line in text.splitlines():
+        m = re.search(r"\b(1-\d{6,10})\b", line)
+        if m:
+            name = re.sub(r"^\s*\d+[.)]?\s*", "", line[:m.start()]).strip(" |,-")
+            rows.append((m.group(1), name))
+    return rows
 
 
 def parse_date(s: str) -> date | None:
