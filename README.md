@@ -130,6 +130,8 @@ python3.11 -m venv .venv
 
 **Web demo vs full version:** the Vercel site runs the same engine, with `requirements.txt`. The OCR models do not fit in Vercel's size limit, so uploaded scans go to human review there; only the `forged_scan` demo works, from saved OCR text in `pramaan/ocr_cache.json`. The AI reader is off on the site because no key is set. The site's record lives in `/tmp` and resets when Vercel restarts the function. The full local version (`requirements-full.txt`) has OCR and a permanent database. Redeploy with `vercel deploy --prod`.
 
+**Pitch:** [`docs/pitch/PITCH_SCRIPT.md`](docs/pitch/PITCH_SCRIPT.md) is the full Hinglish pitch with likely questions. [`docs/pitch/AUTO_DEMO.md`](docs/pitch/AUTO_DEMO.md) records a 63-second self-playing demo from https://pramaan-teal.vercel.app/?tour=1.
+
 **Demo order:** `clean`, `forged`, `forged_scan`, `ghost`, then the Reviewer queue tab.
 
 **Layout:** `pramaan/` is the engine, `app.py` the reviewer screen, `samples/` the fictional applications, `tests/` the test suite, `docs/` the deck and video, `CHANGES.md` the log of every change.

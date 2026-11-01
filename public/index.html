@@ -24,6 +24,12 @@ blockquote{margin:8px 0;padding-left:10px;border-left:2px solid var(--line);colo
 details img{max-width:100%;border:1px solid var(--line);margin-top:8px}
 .tablewrap{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:560px}th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);font-size:15px}
 [hidden]{display:none!important}
+#cap{position:fixed;left:0;right:0;bottom:0;z-index:9;background:var(--navy);color:#fff;padding:18px 24px 22px;font:600 24px/1.3 Georgia,serif;text-align:center}
+#cap i{position:absolute;left:0;top:0;height:4px;background:#7fb0ee;width:0}
+#card{position:fixed;inset:0;z-index:10;background:var(--navy);color:#fff;display:flex;flex-direction:column;justify-content:center;padding:0 9vw}
+#card small{font:600 18px Arial;letter-spacing:2px;color:#9db7da}#card h1{font-size:88px;margin:14px 0}#card p{font:30px/1.35 Georgia,serif;max-width:900px;margin:0}
+#card button{align-self:flex-start;margin-top:32px;background:#fff;color:var(--navy);border:0;border-radius:6px;padding:14px 26px;font:700 20px Arial;cursor:pointer}
+body.tour main{padding-bottom:130px}
 </style></head><body>
 <header><div><h1>Pramaan</h1><p>AICTE application validation for SIH26261. Every document is checked against the Approval Process Handbook, against each other, and against earlier applications.</p></div></header>
 <main>
@@ -46,6 +52,8 @@ details img{max-width:100%;border:1px solid var(--line);margin-top:8px}
 <section id="queue" hidden><h2 id="qh">Applications, riskiest first</h2><div class="tablewrap" id="qt"></div>
 <p class="note">This web demo keeps its record for a short time only. The full version keeps a permanent database.</p></section>
 </main>
+<div id="card" hidden><small></small><h1>Pramaan</h1><p></p><button hidden>Start demo</button></div>
+<div id="cap" hidden><i></i><span></span></div>
 <script>
 const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const cls={'FAIL':'FAIL','NEEDS REVIEW':'REVIEW','PASS':'PASS'},order=['FAIL','NEEDS REVIEW','PASS'];
@@ -69,4 +77,31 @@ async function tab(q){$('#t1').classList.toggle('on',!q);$('#t2').classList.togg
  const r=await(await fetch('/api/applications')).json();
  $('#qt').innerHTML=r.length?`<table><tr><th>Institution</th><th>Verdict</th><th>Failed</th><th>Review</th><th>Passed</th><th>Report</th></tr>${r.map(a=>`<tr><td>${esc(a.institution)}</td><td>${esc(a.verdict)}</td><td>${a.failed}</td><td>${a.review}</td><td>${a.passed}</td><td><a href="/api/applications/${a.id}/report.pdf">PDF</a></td></tr>`).join('')}</table>`:'<p class="note">Nothing checked yet.</p>'}
 $('#t1').onclick=()=>tab(false);$('#t2').onclick=()=>tab(true);
+
+// Auto-demo: open /?tour=1, start the screen recording, press Start. It plays itself; speak over it.
+const wait=ms=>new Promise(r=>setTimeout(r,ms/SPEED)),SPEED=+new URLSearchParams(location.search).get('speed')||1;
+function card(small,line,button){const c=$('#card');c.hidden=false;c.querySelector('small').textContent=small;c.querySelector('p').textContent=line;c.querySelector('button').hidden=!button}
+async function caption(text,ms){$('#cap span').textContent=text;$('#cap').hidden=false;const bar=$('#cap i');bar.style.transition='none';bar.style.width='0';bar.offsetWidth;
+ bar.style.transition=`width ${ms/SPEED}ms linear`;bar.style.width='100%';await wait(ms)}
+async function pick(name){const old=$('#out').innerHTML;$('#out').innerHTML='';document.querySelector(`[data-d=${name}]`).click();
+ while(!$('#out .verdict'))await new Promise(r=>setTimeout(r,100));if(innerWidth>820)scrollTo({top:0,behavior:'smooth'})}
+const glide=el=>el&&el.scrollIntoView({behavior:'smooth',block:'center'});
+const find=text=>[...document.querySelectorAll('#out details')].find(d=>d.textContent.includes(text));
+async function tour(){
+ document.body.classList.add('tour');
+ card('SMART INDIA HACKATHON 2026 · SIH26261 · AICTE','Every AICTE application verdict, with proof.',false);await wait(7000);$('#card').hidden=true;
+ await pick('clean');await caption('A complete application: read, checked against the handbook, verified in seconds',6000);
+ find('student to faculty').open=true;find('built-up area').open=true;glide(find('student to faculty'));await caption('Every result quotes its source: faculty ratio, area worked out room by room',7000);
+ await pick('forged');await caption('A forged fire certificate: expired date covered, new date typed on top',5000);
+ glide($('#out details img'));await caption('Pramaan reads the real date underneath and shows exactly where it was covered',8000);
+ await pick('forged_scan');await caption('Printed and scanned: no edit marks left. The QR code still holds the true date',9000);
+ await pick('ghost');await caption('A second college: every file looks fine, but 25 faculty are already on record elsewhere',10000);
+ $('#t2').click();await caption('Reviewers get one queue, riskiest first, with a report for every application',6000);
+ $('#cap').hidden=true;card('EVERY VERDICT, WITH PROOF','AI proposes. Code verifies. Anything uncertain goes to a human, with the reason.',false);
+}
+if(new URLSearchParams(location.search).has('tour')){
+ fetch('/api/demo/clean',{method:'POST'}); // wake the server so the first step is instant
+ card('AUTO-DEMO','Start your screen recording, then press Start.',true);
+ $('#card button').onclick=tour;
+}
 </script></body></html>

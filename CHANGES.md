@@ -26,3 +26,4 @@ Every change from the prototype on, newest last.
 - Replaced OpenCV with `zxing-cpp` for QR reading and pinned PyMuPDF below 1.27 to fit Vercel's size limit (177 MB). OCR is optional; `requirements-full.txt` is the local install.
 - Without OCR a scan goes to a human instead of rejecting the application as "missing". Demo scan text is cached in `pramaan/ocr_cache.json`.
 - API routes moved under `/api`.
+- **Pitch and auto-demo.** `/?tour=1` plays the demo by itself with captions for recording; Hinglish pitch script and voice-over script in `docs/pitch/`.
