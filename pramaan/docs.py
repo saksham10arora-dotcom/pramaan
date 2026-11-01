@@ -7,9 +7,11 @@ from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 
-import cv2
-import numpy as np
+import io
+import json
+
 import pymupdf
+from PIL import Image
 
 IMAGE_EXT = (".jpg", ".jpeg", ".png", ".webp", ".tif", ".tiff")
 OCR_DPI = 200
@@ -32,24 +34,46 @@ class Document:
     spans: list = field(default_factory=list)
     whiteouts: list = field(default_factory=list)  # (page, bbox) of filled white boxes
     metadata: dict = field(default_factory=dict)
-    images: list = field(default_factory=list)  # one BGR array per page, for OCR, QR and image forensics
+    images: list = field(default_factory=list)  # one PIL image per page, for OCR and QR
     is_image: bool = False
     ocr_pages: list = field(default_factory=list)
     signed: bool = False
+    unread_scan: bool = False  # a scan arrived but OCR is not installed here
 
     @property
     def sha256(self):
         return hashlib.sha256(self.raw).hexdigest()
 
 
+CACHE = Path(__file__).parent / "ocr_cache.json"  # OCR results for the demo scans, used where OCR cannot be installed
+
+
 @lru_cache(maxsize=1)
 def _ocr():
-    from rapidocr_onnxruntime import RapidOCR
+    try:
+        from rapidocr_onnxruntime import RapidOCR
+    except ImportError:  # the web deployment is too small to carry the OCR models
+        return None
     return RapidOCR()
 
 
-def ocr(img, page: int) -> list[Span]:
-    result, _ = _ocr()(img)
+@lru_cache(maxsize=1)
+def _cache():
+    return json.loads(CACHE.read_text()) if CACHE.exists() else {}
+
+
+def available() -> bool:
+    return _ocr() is not None
+
+
+def ocr(img, page: int, key: str = "") -> list[Span] | None:
+    """None means OCR is not available for this page."""
+    engine = _ocr()
+    if engine is None:
+        rows = _cache().get(key)
+        return None if rows is None else [Span(page, t, "ocr", tuple(b), c) for t, b, c in rows]
+    import numpy as np
+    result, _ = engine(np.array(img.convert("RGB"))[:, :, ::-1])
     spans = []
     for box, text, conf in result or []:
         xs, ys = [p[0] for p in box], [p[1] for p in box]
@@ -79,18 +103,22 @@ def load(path_or_bytes, name=None) -> Document:
     else:
         raw = bytes(path_or_bytes)
     name = name or "document"
+    key = hashlib.sha256(raw).hexdigest()
     if name.lower().endswith(IMAGE_EXT):
-        img = cv2.imdecode(np.frombuffer(raw, np.uint8), cv2.IMREAD_COLOR)
-        if img is None:
+        try:
+            img = Image.open(io.BytesIO(raw)).convert("RGB")
+        except Exception:
             return Document(name, raw, "", is_image=True)
-        spans = ocr(img, 0)
-        return Document(name, raw, _lines(spans), spans, images=[img], is_image=True, ocr_pages=[0])
+        spans = ocr(img, 0, f"{key}:0")
+        return Document(name, raw, _lines(spans or []), spans or [], images=[img], is_image=True, ocr_pages=[0],
+                        unread_scan=spans is None)
 
     pdf = pymupdf.open(stream=raw, filetype="pdf")
     spans, whiteouts, pages, images, ocr_pages = [], [], [], [], []
+    unread = False
     for pno, page in enumerate(pdf):
         pix = page.get_pixmap(dpi=OCR_DPI)
-        img = cv2.cvtColor(np.frombuffer(pix.samples, np.uint8).reshape(pix.h, pix.w, pix.n)[..., :3], cv2.COLOR_RGB2BGR)
+        img = Image.frombytes("RGB", (pix.width, pix.height), pix.samples) if pix.n == 3 else Image.open(io.BytesIO(pix.tobytes("png"))).convert("RGB")
         images.append(img)
         page_spans = []
         for block in page.get_text("dict")["blocks"]:
@@ -102,7 +130,9 @@ def load(path_or_bytes, name=None) -> Document:
             pages.append(page.get_text())
         else:  # scanned page: OCR it, boxes scaled back to PDF points
             scale = 72 / OCR_DPI
-            page_spans = [Span(s.page, s.text, s.font, tuple(v * scale for v in s.bbox), s.conf) for s in ocr(img, pno)]
+            read = ocr(img, pno, f"{key}:{pno}")
+            unread = unread or read is None
+            page_spans = [Span(s.page, s.text, s.font, tuple(v * scale for v in s.bbox), s.conf) for s in read or []]
             pages.append(_lines(page_spans))
             ocr_pages.append(pno)
         spans += page_spans
@@ -111,4 +141,4 @@ def load(path_or_bytes, name=None) -> Document:
                 whiteouts.append((pno, tuple(d["rect"])))
     signed = pdf.get_sigflags() > 0
     return Document(name, raw, "\n".join(pages), spans, whiteouts, dict(pdf.metadata or {}),
-                    images, False, ocr_pages, signed)
+                    images, False, ocr_pages, signed, unread)

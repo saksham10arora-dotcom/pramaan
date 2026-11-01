@@ -20,3 +20,9 @@ Every change from the prototype on, newest last.
 - **REST API, PDF report, reviewer queue.**
 - **Deck and demo video** with script, in `docs/`.
 - **Dropped:** issuer verification, CCA root check, Hindi OCR, error level analysis. Reasons in the README.
+
+## 2026-11-01
+- **Public web demo on Vercel** at https://pramaan-teal.vercel.app: FastAPI plus a static reviewer page. Streamlit stays for local use.
+- Replaced OpenCV with `zxing-cpp` for QR reading and pinned PyMuPDF below 1.27 to fit Vercel's size limit (177 MB). OCR is optional; `requirements-full.txt` is the local install.
+- Without OCR a scan goes to a human instead of rejecting the application as "missing". Demo scan text is cached in `pramaan/ocr_cache.json`.
+- API routes moved under `/api`.

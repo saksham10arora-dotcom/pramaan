@@ -166,9 +166,9 @@ def test_api_round_trip(tmp_path, monkeypatch):
     monkeypatch.setattr(api, "registry", Registry())
     client = TestClient(api.app)
     upload = [("files", (p.name, p.read_bytes(), "application/pdf")) for p in sorted(tmp_path.glob("*.pdf"))]
-    r = client.post("/applications", files=upload).json()
+    r = client.post("/api/applications", files=upload).json()
     assert r["verdict"] == "COMPLIANT"
-    assert client.get("/applications").json()[0]["id"] == r["id"]
-    pdf = client.get(f"/applications/{r['id']}/report.pdf")
+    assert client.get("/api/applications").json()[0]["id"] == r["id"]
+    pdf = client.get(f"/api/applications/{r['id']}/report.pdf")
     assert pdf.content[:4] == b"%PDF"
-    assert client.get("/applications/999").status_code == 404
+    assert client.get("/api/applications/999").status_code == 404

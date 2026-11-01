@@ -77,8 +77,14 @@ def analyse(files: dict, norms: dict = NORMS, reader="auto", registry=None) -> R
     if reader == "auto":
         reader = llm.read if llm.available() else None
     docs, fields, findings = {}, {}, []
+    unread_scans = 0
     for name, src in files.items():
         doc = load(src, name)
+        if doc.unread_scan:
+            unread_scans += 1
+            findings.append(Finding("scan not read", REVIEW, f"{name} is a scan and this deployment has no OCR: "
+                                    "check it by hand or use the full version", [(name, "")]))
+            continue
         kind = classify(doc.text)
         found = extract(kind, doc.text) if kind else {}
         if reader and (kind is None or len(found) < len(FIELDS[kind])):
@@ -111,8 +117,9 @@ def analyse(files: dict, norms: dict = NORMS, reader="auto", registry=None) -> R
         return parse_number(x.value) if x else None
 
     missing = [k for k in norms["required_documents"] if k not in docs]
-    findings.append(Finding("required documents", FAIL if missing else PASS,
-                            "missing: " + ", ".join(missing) if missing else "all required documents present", []))
+    # a document we could not open may be one of the missing ones, so that is a human's call, not a rejection
+    findings.append(Finding("required documents", (REVIEW if unread_scans else FAIL) if missing else PASS,
+                            "not found: " + ", ".join(missing) if missing else "all required documents present", []))
 
     for kind, keys in KEY_FIELDS.items():
         unread = [k.replace("_", " ") for k in keys if kind in docs and not f(kind, k)]

@@ -6,6 +6,10 @@ Pramaan reads every document an institution submits for AICTE approval and retur
 
 ---
 
+**Live demo:** https://pramaan-teal.vercel.app
+
+---
+
 ## 1. Problem statement
 
 | | |
@@ -68,7 +72,7 @@ documents (PDF, scanned PDF, phone photo)
 | **Never approves a doubt** | Unreadable key fields, unknown documents, missing norms and AI failures all go to a human. | `pramaan/validate.py` |
 | **Reviewer screen** | Upload or demo, verdict, quoted evidence, covered region outlined, PDF report, queue sorted by risk. | `app.py` |
 | **REST API** | `POST /applications`, `GET /applications`, `GET /applications/{id}`, `GET /applications/{id}/report.pdf`. | `pramaan/api.py` |
-| **Tests** | 28 tests. | `tests/` |
+| **Tests** | 29 tests. | `tests/` |
 
 ## 4. Submission material 🎬
 
@@ -115,14 +119,16 @@ Needs Python 3.11.
 ```bash
 git clone https://github.com/saksham10arora-dotcom/pramaan && cd pramaan
 python3.11 -m venv .venv
-.venv/bin/pip install -r requirements.txt
+.venv/bin/pip install -r requirements-full.txt
 .venv/bin/python samples/make_samples.py     # demo applications in samples/out/
 .venv/bin/streamlit run app.py               # reviewer screen
 .venv/bin/uvicorn pramaan.api:app            # REST API, docs at /docs
-.venv/bin/python -m pytest -q                # 28 tests
+.venv/bin/python -m pytest -q                # 29 tests
 ```
 
 **AI reader (optional):** set `GEMINI_API_KEY` in your environment or in `~/.config/keys.env`.
+
+**Web demo vs full version:** the Vercel site runs the same engine, with `requirements.txt`. The OCR models do not fit in Vercel's size limit, so uploaded scans go to human review there; only the `forged_scan` demo works, from saved OCR text in `pramaan/ocr_cache.json`. The AI reader is off on the site because no key is set. The site's record lives in `/tmp` and resets when Vercel restarts the function. The full local version (`requirements-full.txt`) has OCR and a permanent database. Redeploy with `vercel deploy --prod`.
 
 **Demo order:** `clean`, `forged`, `forged_scan`, `ghost`, then the Reviewer queue tab.
 
