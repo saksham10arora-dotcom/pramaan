@@ -1,8 +1,9 @@
 """Downloadable review report for one application."""
+import base64
 import io
 from xml.sax.saxutils import escape
 
-from reportlab.lib import colors
+import pymupdf
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
@@ -26,3 +27,21 @@ def to_pdf(report: dict) -> bytes:
         body.append(Spacer(1, 6))
     SimpleDocTemplate(out, pagesize=A4, title="Pramaan review report").build(body)
     return out.getvalue()
+
+
+def highlights(files: dict, findings: list) -> list[dict]:
+    """The page around every white box, outlined, as a PNG data URL for the reviewer."""
+    from .docs import load
+    out = []
+    for x in findings:
+        if x.rule.startswith("tampering") and "white box" in x.reason:
+            name = x.rule.split(": ", 1)[1]
+            doc = load(files[name], name)
+            pdf = pymupdf.open(stream=doc.raw, filetype="pdf")
+            for pno, box in doc.whiteouts:
+                page = pdf[pno]
+                page.draw_rect(pymupdf.Rect(box) + (-4, -4, 4, 4), color=(0.9, 0.1, 0.1), width=2)
+                clip = pymupdf.Rect(0, max(0, box[1] - 120), page.rect.width, box[3] + 80)
+                png = page.get_pixmap(dpi=110, clip=clip).tobytes("png")
+                out.append({"rule": x.rule, "image": "data:image/png;base64," + base64.b64encode(png).decode()})
+    return out

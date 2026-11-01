@@ -4,3 +4,4 @@ __pycache__/
 samples/out/
 .pytest_cache/
 data/
+.vercel

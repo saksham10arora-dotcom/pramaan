@@ -2,8 +2,7 @@
 import io
 import re
 
-import cv2
-import numpy as np
+import zxingcpp
 
 from .docs import Document
 
@@ -33,13 +32,7 @@ def editor_trace(doc: Document) -> str | None:
 
 
 def qr_payloads(doc: Document) -> list[str]:
-    out = []
-    det = cv2.QRCodeDetector()
-    for img in doc.images:
-        ok, texts, _, _ = det.detectAndDecodeMulti(img)
-        if ok:
-            out += [t for t in texts if t]
-    return out
+    return [r.text for img in doc.images for r in zxingcpp.read_barcodes(img) if r.text]
 
 
 def signatures(doc: Document) -> list[dict]:

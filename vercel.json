@@ -1,0 +1,3 @@
+{
+  "functions": {"api/index.py": {"maxDuration": 30, "includeFiles": "{pramaan/**,demo_bundles/**}"}}
+}
