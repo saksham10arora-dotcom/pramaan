@@ -4,7 +4,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent.parent.parent
 PATH = ROOT / "public" / "tour.json"
-WORDS_PER_SECOND = 2.5  # normal spoken Hinglish
+WORDS_PER_SECOND = 2.35  # clear spoken English, a little slower than conversation
 scenes = json.loads(PATH.read_text())
 for x in scenes:
     x["ms"] = round((len(x["say"].split()) / WORDS_PER_SECOND + 1) * 1000, -2)
@@ -13,31 +13,31 @@ PATH.write_text(json.dumps(scenes, ensure_ascii=False, indent=0))
 total = sum(x["ms"] for x in scenes) / 1000
 out = [f"""# Auto-demo: 5 speakers, {total / 60:.0f} minutes
 
-Page khud chalta hai. Har speaker apni lines bolta hai.
+The page plays by itself. Each speaker reads their own lines.
 
-**Screen ke neeche right me scene number dikhta hai (jaise 7/{len(scenes)}), wahi number yahan hai.** Number ke upar ki patli line bhar jaaye toh agli line. Atak jao toh **Space** dabao, demo ruk jaayega; dobara Space se chalega.
+**The scene number shows at the bottom right of the screen (like 7/{len(scenes)}), and it matches the number here.** When the thin line above the caption fills up, move to the next line. If someone gets stuck, press **Space** to pause, and Space again to continue.
 
-| Speaker | Naam | Scenes | Time |
+| Speaker | Name | Scenes | Time |
 |---|---|---|---|"""]
 for s in range(1, 6):
     mine = [i for i, x in enumerate(scenes, 1) if x["s"] == s]
     secs = sum(scenes[i - 1]["ms"] for i in mine) / 1000
     out.append(f"| {s} | _____ | {mine[0]} to {mine[-1]} | {secs / 60:.1f} min |")
 out.append("""
-## Record karne ke steps
+## How to record
 
-1. Ek baar practice karo. Speed dekhne ke liye page poora chala lo.
-2. Chrome me kholo: https://pramaan-teal.vercel.app/?tour=1
-3. Chrome full screen karo (Ctrl + Cmd + F).
-4. **Cmd + Shift + 5**, Record Entire Screen, Options me mic select karo, Record dabao.
-5. Page pe **Start demo** dabao aur Speaker 1 shuru kare.
-6. Aakhri card pe 2 second ruk ke menu bar me Stop dabao.
+1. Do one practice run first, to check your speed.
+2. Open in Chrome: https://pramaan-teal.vercel.app/?tour=1
+3. Make Chrome full screen (Ctrl + Cmd + F).
+4. Press **Cmd + Shift + 5**, choose Record Entire Screen, select your mic under Options, and press Record.
+5. Press **Start demo** on the page. Speaker 1 begins.
+6. On the last card, wait 2 seconds, then press Stop in the menu bar.
 
-Paanchon ek hi laptop ke paas baitho aur mic ke paas aake bolo. Alag jagah ho toh Google Meet pe aao, ek banda screen share kare aur Meet record ho.
+Sit around one laptop and move close to the mic to speak. If you are in different places, join a Google Meet, have one person share the screen, and record the Meet.
 """)
-titles = {1: "Problem aur idea", 2: "Clean application aur forgery ki shuruaat", 3: "Forgery pakadna", 4: "Ghost faculty, queue aur andar ka system", 5: "AI, feasibility, limits, close"}
+titles = {1: "Problem and idea", 2: "Clean application, start of the forgery", 3: "Catching the forgery", 4: "Ghost faculty, queue, how it works", 5: "AI, feasibility, limits, close"}
 for s in range(1, 6):
-    out.append(f"## Speaker {s}: {titles[s]}\n\n| Scene | Sec | Bolo |\n|---|---|---|")
+    out.append(f"## Speaker {s}: {titles[s]}\n\n| Scene | Sec | Say |\n|---|---|---|")
     out += [f"| {i} | {x['ms'] / 1000:.0f} | {x['say']} |" for i, x in enumerate(scenes, 1) if x["s"] == s]
     out.append("")
 (ROOT / "docs" / "pitch" / "AUTO_DEMO.md").write_text("\n".join(out))

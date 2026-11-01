@@ -6,8 +6,8 @@
 "line": "Every AICTE application verdict, with proof."
 },
 "cap": "Pramaan",
-"say": "Good morning. Hum team hain, aur hamara problem statement SIH26261 hai, AICTE ka: AI se application validation, document authentication aur compliance verification. Hamara solution hai Pramaan, jiska matlab hai proof.",
-"ms": 13000.0
+"say": "Good morning. Our problem statement is SIH26261 from AICTE: AI-powered application validation, document authentication and regulatory compliance verification. Our solution is Pramaan, which means proof.",
+"ms": 11600.0
 },
 {
 "s": 1,
@@ -16,8 +16,8 @@
 "line": "Manual checks are slow. An edited certificate looks genuine. Nobody can compare one faculty list with every other college."
 },
 "cap": "Three problems",
-"say": "AICTE approval ke liye har institution land deed, building certificate, fire certificate aur faculty list deta hai, aur officers ye sab haath se padhte hain. Isme teen problems hain. Ye slow hai. Edit kiya hua certificate aankh se asli lagta hai. Aur koi officer ek college ki faculty list ko baaki saare colleges se compare nahi kar sakta.",
-"ms": 24200.0
+"say": "To get AICTE approval, every institution submits a land deed, a building certificate, a fire safety certificate and a faculty list, and officers read all of it by hand. That creates three problems. It is slow. An edited certificate looks genuine to the eye. And no officer can compare one college's faculty list against every other college.",
+"ms": 25300.0
 },
 {
 "s": 1,
@@ -26,15 +26,15 @@
 "line": "One verdict: Compliant, Reject, or Human review. Every finding quotes its source."
 },
 "cap": "One verdict, with proof",
-"say": "Pramaan poora application padhta hai aur teen me se ek verdict deta hai: compliant, reject, ya human review. Har finding ke saath document ki wahi line dikhti hai jahan se wo aayi. Jahan shak ho, wahan ye khud approve nahi karta.",
-"ms": 17400.0
+"say": "Pramaan reads the whole application and gives one of three verdicts: compliant, reject, or human review. Every finding shows the exact line of the document it came from. And wherever it is unsure, it does not approve on its own.",
+"ms": 18000.0
 },
 {
 "s": 2,
 "pick": "clean",
 "cap": "A complete application",
-"say": "Ab live demo dekhte hain. Ye ek fictional college ka sahi application hai, Shree Ram Institute of Technology. Ek click me Pramaan ne saare documents padh liye aur verdict diya: compliant.",
-"ms": 13400.0
+"say": "Let's see it live. This is a complete application from a fictional college, Shree Ram Institute of Technology. With one click, Pramaan reads every document and gives its verdict: compliant.",
+"ms": 13800.0
 },
 {
 "s": 2,
@@ -43,8 +43,8 @@
 ],
 "glide": "student to faculty",
 "cap": "Faculty ratio from the AICTE handbook",
-"say": "Ye check dekhiye. 480 students pe 25 faculty hain, yaani 19.2 students per faculty. AICTE handbook ke Annexure 5 me limit 20 hai, isliye pass. Aur neeche wo exact line dikhti hai jahan se ye number aaya.",
-"ms": 15800.0
+"say": "Look at this check. There are 480 students and 25 faculty, which is 19.2 students per faculty member. The limit in Annexure 5 of the AICTE handbook is 20, so it passes. Below it is the exact line that number came from.",
+"ms": 18900.0
 },
 {
 "s": 2,
@@ -53,57 +53,57 @@
 ],
 "glide": "built-up area",
 "cap": "Built-up area worked out room by room",
-"say": "Building area bhi andaaze se nahi hai. Annexure 3 ke room-wise table se calculate hua hai: classrooms, labs, library, sab jod ke. 5,562 square metre chahiye, aur certificate pe 6,000 hai.",
-"ms": 13400.0
+"say": "The building area is not a guess either. It is calculated room by room from the tables in Annexure 3: classrooms, labs, library, all of it. The college needs 5,562 square metres, and its certificate shows 6,000.",
+"ms": 16700.0
 },
 {
 "s": 2,
 "pick": "forged",
 "cap": "A forged fire certificate",
-"say": "Ab forgery. Is college ka fire certificate March 2026 me expire ho chuka hai. Application September 2026 ki hai, toh ye reject hona chahiye.",
-"ms": 10600.0
+"say": "Now a forgery. This college's fire certificate expired in March 2026, and the application is dated September 2026. So this should be rejected.",
+"ms": 10800.0
 },
 {
 "s": 3,
 "glide": "img",
 "cap": "Expired date covered, new date typed on top",
-"say": "Kisi ne date ke upar white box lagaya aur 2027 type kar diya. Page dekhiye, aankh se bilkul theek lagta hai. Officer ise pass kar sakta hai. Par laal box me Pramaan dikha raha hai ki chhedchhad kahan hui.",
-"ms": 16600.0
+"say": "Someone placed a white box over the date and typed 2027. Look at the page. By eye it looks perfectly fine, and an officer could pass it. But Pramaan outlines in red exactly where it was changed.",
+"ms": 16700.0
 },
 {
 "s": 3,
 "glide": "odd font",
 "cap": "White box, odd font, saved after issue",
-"say": "Pramaan ne white box, alag font, aur file ka dobara save hona, teeno pakde. Aur white box ke neeche asli date abhi bhi file me hai, Pramaan wahi padhta hai.",
-"ms": 13000.0
+"say": "Pramaan caught the white box, the different font, and the fact that the file was saved again after it was issued. The real date is still in the file under the white box, and that is the date Pramaan reads.",
+"ms": 18000.0
 },
 {
 "s": 3,
 "glide": "land owned",
 "cap": "Land is not in the trust's name",
-"say": "Saath hi land trust ke naam nahi, ek private person ke naam nikli. Pramaan ne do alag documents khud mila ke pakad liya.",
-"ms": 10200.0
+"say": "It also found that the land is in a private person's name, not the trust's. Pramaan matched two separate documents on its own to catch that.",
+"ms": 12100.0
 },
 {
 "s": 3,
 "pick": "forged_scan",
 "cap": "Printed and scanned: no edit marks left",
-"say": "Ab smart forger. Ye page ko print karke scan kar deta hai, taaki edit ka koi nishaan na bache. Ab white box nahi, alag font nahi, page pe seedha 2027 likha hai.",
+"say": "Now a smarter forger. They print the page and scan it, so no edit marks survive. There is no white box and no odd font. The page simply says 2027.",
 "ms": 13800.0
 },
 {
 "s": 3,
 "glide": "QR code on",
 "cap": "The QR code still holds the true date",
-"say": "Par QR code me abhi bhi 2026 hai. Pramaan QR padhta hai, page se compare karta hai, aur reject kar deta hai.",
-"ms": 9800.0
+"say": "But the QR code still says 2026. Pramaan reads the QR code, compares it with the page, and rejects the application.",
+"ms": 9900.0
 },
 {
 "s": 4,
 "pick": "ghost",
 "cap": "A second college. Every file looks fine.",
-"say": "Ab sabse important case. Ye ek doosra college hai, Ganga College of Engineering. Iska har document apne aap me bilkul theek hai. Koi edit nahi, koi expired date nahi.",
-"ms": 12600.0
+"say": "Now the most important case. This is a different college, Ganga College of Engineering. Every document looks fine on its own. No edits, no expired dates.",
+"ms": 12100.0
 },
 {
 "s": 4,
@@ -112,22 +112,22 @@
 ],
 "glide": "faculty at another",
 "cap": "25 faculty are already on another college's record",
-"say": "Par Pramaan purani applications yaad rakhta hai. Iski 25 faculty pehle se Shree Ram Institute ki list me hain. Yani ek hi log do colleges me dikhaye ja rahe hain. Isi ko ghost faculty kehte hain.",
-"ms": 15400.0
+"say": "But Pramaan remembers earlier applications. These 25 faculty members are already listed by Shree Ram Institute. The same people are being shown at two colleges. This is called ghost faculty.",
+"ms": 13800.0
 },
 {
 "s": 4,
 "glide": "reused document",
 "cap": "The fire certificate number is already in use",
-"say": "Fire certificate ka number bhi wahi hai jo pehle college ne diya tha. Ye ek file dekh ke kabhi nahi pakda ja sakta.",
-"ms": 10200.0
+"say": "The fire certificate number is also the same one the first college submitted. You can never catch this by looking at one file.",
+"ms": 10800.0
 },
 {
 "s": 4,
 "tab": "queue",
 "cap": "One queue, riskiest first",
-"say": "Ye officer ka screen hai. Saari applications ek queue me, sabse risky sabse upar, aur har application ki PDF report evidence ke saath. REST API bhi hai, toh AICTE portal seedha connect ho sakta hai.",
-"ms": 15000.0
+"say": "This is the officer's screen. All applications sit in one queue with the riskiest on top, and each has a PDF report with its evidence. There is also a REST API, so the AICTE portal can connect directly.",
+"ms": 17200.0
 },
 {
 "s": 4,
@@ -136,8 +136,8 @@
 "line": "Read. Classify. Extract. Verify. Check norms. Authenticate. Remember. Verdict."
 },
 "cap": "The pipeline",
-"say": "Andar kya chalta hai? Document padha jaata hai, scanned ho toh offline OCR se. Phir norms check hote hain, forgery checks chalte hain, aur registry purani applications se milati hai.",
-"ms": 13000.0
+"say": "How does it work inside? Each document is read, using offline OCR if it is a scan. Then the norms are checked, the forgery checks run, and the registry compares it with earlier applications.",
+"ms": 15500.0
 },
 {
 "s": 5,
@@ -146,8 +146,8 @@
 "line": "AI proposes. Code verifies."
 },
 "cap": "AI proposes. Code verifies.",
-"say": "Free-form letters Gemini padhta hai, par uski baat seedhi nahi maani jaati. Value tabhi rakhi jaati hai jab uski source line document me sach me ho, aur numbers exact match karein. Warna wo officer ke paas jaati hai.",
-"ms": 16200.0
+"say": "Free-form letters are read by Gemini, but we do not simply trust it. A value is kept only if its source line is really in the document and the numbers match exactly. Otherwise it goes to an officer.",
+"ms": 17200.0
 },
 {
 "s": 5,
@@ -156,8 +156,8 @@
 "line": "Working live link. 29 automated tests. Norms from the AICTE Approval Process Handbook 2024-27."
 },
 "cap": "Built and running",
-"say": "Ye sirf idea nahi hai. Live link chal raha hai, 29 automated tests pass hain, aur norms seedhe AICTE Approval Process Handbook 2024-27 se liye gaye hain.",
-"ms": 11800.0
+"say": "This is not just an idea. The live link is running, 29 automated tests pass, and the norms come directly from the AICTE Approval Process Handbook 2024 to 27.",
+"ms": 13300.0
 },
 {
 "s": 5,
@@ -166,8 +166,8 @@
 "line": "Tested on synthetic documents so far. A careful photo edit with no QR code is not caught yet."
 },
 "cap": "What it cannot do yet",
-"say": "Hum limits bhi saaf batate hain. Abhi tak sirf synthetic documents pe test hua hai, asli scans mushkil honge. Aur photo pe bahut safai se ki gayi editing, agar QR ya signature na ho, abhi nahi pakdi jaati.",
-"ms": 16200.0
+"say": "We are also clear about our limits. So far we have tested only on synthetic documents, and real scans will be harder. And a very careful edit on a photo, with no QR code or signature, is not caught yet.",
+"ms": 18000.0
 },
 {
 "s": 5,
@@ -176,8 +176,8 @@
 "line": "Officers focus on risky files. Honest colleges know what to fix. Students get real faculty and safe buildings."
 },
 "cap": "Who benefits",
-"say": "Officers ka time risky applications pe lagta hai, honest colleges ko pata chalta hai kya theek karna hai, aur students ko milti hai asli faculty aur safe building.",
-"ms": 12200.0
+"say": "Officers spend their time on risky applications, honest colleges learn exactly what to fix, and students get real faculty and safe buildings.",
+"ms": 10400.0
 },
 {
 "s": 5,
@@ -186,7 +186,7 @@
 "line": "AI proposes. Code verifies. Anything uncertain goes to a human, with the reason."
 },
 "cap": "Thank you",
-"say": "Pramaan: har verdict, proof ke saath. Thank you.",
-"ms": 4200.0
+"say": "Pramaan: every verdict, with proof. Thank you.",
+"ms": 4000.0
 }
 ]

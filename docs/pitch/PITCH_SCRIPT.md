@@ -1,21 +1,21 @@
-# Pramaan: pitch aur demo script (Hinglish)
+# Pramaan: pitch and demo script
 
-**Bolo** = kya bolna hai. *Italics* = us waqt screen pe kya karna hai.
+**Say** is what to speak. *Italics* are what to do on screen.
 
-Total: lagbhag 6 minute (pitch 4, demo andar hi chalta hai). Har number sach hai aur check kiya hua hai. Koi number apni taraf se mat badhana.
+Total: about 6 minutes, with the demo inside it. Every number here is true and checked. Do not add numbers of your own.
 
 ---
 
-## Shuru hone se pehle (15 minute pehle)
+## Before you start (15 minutes early)
 
-*Charger lagao, Do Not Disturb on karo. Chrome me do tabs kholo:*
+*Plug in the charger and turn on Do Not Disturb. Open two tabs in Chrome:*
 
 1. Slides: `docs/slides/Pramaan_SIH_deck.pptx`
 2. Live demo: https://pramaan-teal.vercel.app
 
-*Ek baar Clean aur Ghost faculty daba ke dekh lo, isse server jaag jaata hai.*
+*Click Clean and Ghost faculty once to wake the server.*
 
-**Backup:** net na chale toh `docs/demo/pramaan_demo.mp4` chala do. Local version bhi chalao:
+**Backup:** if the internet fails, play `docs/demo/pramaan_demo.mp4`, or run the local version:
 
 ```bash
 .venv/bin/streamlit run app.py
@@ -25,86 +25,86 @@ Total: lagbhag 6 minute (pitch 4, demo andar hi chalta hai). Har number sach hai
 
 ## Part 1: Problem (45 sec) · Slide 1
 
-> Good morning. Hamara problem statement SIH26261 hai, AICTE ka: AI se application validation, document authentication aur compliance verification.
+> Good morning. Our problem statement is SIH26261 from AICTE: AI-powered application validation, document authentication and regulatory compliance verification.
 >
-> Har institution ko AICTE approval ke liye documents ka poora set dena padta hai: land deed, building certificate, fire safety certificate, faculty list. Aaj officers ye sab haath se padhte hain.
+> To get AICTE approval, every institution submits a full set of documents: land deed, building certificate, fire safety certificate, faculty list. Today, officers read all of it by hand.
 >
-> Isme teen problems hain. Ye slow hai. Edit kiya hua certificate aankh se asli lagta hai. Aur koi officer ek college ki faculty list ko baaki sab colleges se compare nahi kar sakta.
+> That creates three problems. It is slow. An edited certificate looks genuine to the eye. And no officer can compare one college's faculty list against every other college.
 
-## Part 2: Hamara idea (40 sec) · Slide 2
+## Part 2: Our idea (40 sec) · Slide 2
 
-> Humne banaya Pramaan. Pramaan matlab proof.
+> We built Pramaan, which means proof.
 >
-> Institution ka poora application do, aur ye teen me se ek verdict deta hai: compliant, reject, ya human review. Har finding ke saath document ki wahi line dikhti hai jahan se wo aayi.
+> Give it a full application and it returns one of three verdicts: compliant, reject, or human review. Every finding shows the exact line of the document it came from.
 >
-> Aur ek rule pakka hai: jahan isko shak hai, wahan ye khud approve nahi karta. Officer ke paas bhejta hai, reason ke saath.
+> One rule is fixed: where it is unsure, it does not approve on its own. It sends the case to an officer, with the reason.
 
 ## Part 3: Live demo (2 min 15 sec)
 
-*Demo tab pe jao.*
+*Switch to the demo tab.*
 
-**Clean** · *Clean dabao. Student to faculty ratio aur built-up area wali lines kholo.*
+**Clean** · *Click Clean. Open the student to faculty ratio and built-up area lines.*
 
-> Ye ek sahi application hai. Verdict: compliant. Dekhiye, 480 students pe 25 faculty, yaani 19.2, aur handbook ki limit 20 hai. Building area bhi Annexure 3 ke room-wise table se calculate hua: 5,562 square metre chahiye, 6,000 bana hai.
+> This is a valid application. The verdict is compliant. Here we have 480 students and 25 faculty, which is 19.2, and the handbook limit is 20. The building area comes from the room-wise tables in Annexure 3: 5,562 square metres are needed and 6,000 are built.
 
-**Forged PDF** · *Forged PDF dabao, neeche white box wali image tak scroll karo.*
+**Forged PDF** · *Click Forged PDF and scroll down to the white box image.*
 
-> Ab forgery. Fire certificate March 2026 me expire ho gaya. Kisi ne date pe white box lagaya aur 2027 type kar diya. Aankh se bilkul theek lagta hai. Par Pramaan neeche chhupi asli date padh leta hai, aur laal box me dikhata hai ki kahan chhedchhad hui. Saath hi pakda ki land trust ke naam nahi, ek private person ke naam hai.
+> Now a forgery. This fire certificate expired in March 2026. Someone covered the date with a white box and typed 2027. By eye it looks fine. But Pramaan reads the real date hidden underneath, and outlines in red where it was changed. It also caught that the land belongs to a private person, not the trust.
 
-**Forged, then scanned** · *Button dabao.*
+**Forged, then scanned** · *Click the button.*
 
-> Smart forger kya karega? Print karke scan kar dega, taaki edit ka koi nishaan na bache. Page pe ab 2027 hi likha hai. Par certificate ke QR code me abhi bhi 2026 hai. Pramaan dono compare karta hai aur reject kar deta hai.
+> What does a smart forger do? They print and scan the page so no edit marks survive. The page now says 2027. But the certificate's QR code still says 2026. Pramaan compares the two and rejects it.
 
-**Ghost faculty** · *Button dabao.*
+**Ghost faculty** · *Click the button.*
 
-> Ye sabse important hai. Ye doosra college hai. Iska har document apne aap me theek hai. Par Pramaan purani applications yaad rakhta hai. Ye 25 faculty pehle se doosre institution ki list me hain, aur fire certificate ka number bhi wahi hai. Ek file dekh ke ye kabhi nahi pakda ja sakta.
+> This is the most important case. This is a different college, and every document looks fine on its own. But Pramaan remembers earlier applications. These 25 faculty are already on another institution's list, and the fire certificate number is the same. You can never catch this by looking at one file.
 
-**Reviewer queue** · *Tab kholo.*
+**Reviewer queue** · *Open the tab.*
 
-> Officer ko ek hi queue milti hai, sabse risky pehle, aur har application ki PDF report. REST API bhi hai, toh AICTE portal seedha connect ho sakta hai.
+> The officer gets one queue with the riskiest first, and a PDF report for each application. There is also a REST API, so the AICTE portal can connect directly.
 
 ## Part 4: Technology (30 sec) · Slide 3
 
-> Hamara core idea hai: AI proposes, code verifies. Free-form letters Gemini padhta hai, par uski value tabhi rakhi jaati hai jab uski source line document me sach me ho, aur numbers exact match karein. AI kuch bana bhi de, toh wo officer ke paas jaata hai, verdict me nahi.
+> Our core idea is: AI proposes, code verifies. Gemini reads free-form letters, but a value is kept only if its source line is really in the document and the numbers match exactly. If the AI invents something, it goes to an officer, not into the verdict.
 >
-> Scanned documents ke liye OCR hamare server pe offline chalta hai. QR, PDF edits aur digital signature, sab alag se check hote hain.
+> For scanned documents, OCR runs offline on our server. QR codes, PDF edits and digital signatures are each checked separately.
 
-## Part 5: Feasibility aur limits (30 sec) · Slide 4
+## Part 5: Feasibility and limits (30 sec) · Slide 4
 
-> Ye sirf idea nahi, chal raha hai: live link hai, 29 automated tests pass hain, aur norms AICTE ke Approval Process Handbook 2024-27 se liye hain.
+> This is not just an idea, it is running. There is a live link, 29 automated tests pass, and the norms come from the AICTE Approval Process Handbook 2024-27.
 >
-> Hum limits bhi saaf bata rahe hain. Abhi tak sirf synthetic documents pe test hua hai, real scans mushkil honge. Signature me hum check karte hain ki file badli nahi, ye nahi ki sahi office ne sign kiya. Aur photo pe bahut safai se ki gayi editing, agar QR ya signature na ho, abhi nahi pakdi jaati.
+> We are also clear about our limits. So far we have tested only on synthetic documents, and real scans will be harder. For signatures, we check that the file was not changed, not that the right office signed it. And a very careful edit on a photo, with no QR code or signature, is not caught yet.
 
-## Part 6: Impact aur close (30 sec) · Slide 5
+## Part 6: Impact and close (30 sec) · Slide 5
 
-> Officers ka time saaf applications se bachta hai aur risky applications pe lagta hai. Honest colleges ko pata chalta hai kya theek karna hai. Students ko milti hai asli faculty aur safe building.
+> Officers save time on clean applications and spend it on risky ones. Honest colleges learn what to fix. Students get real faculty and safe buildings.
 >
-> Pramaan: har verdict, proof ke saath. Thank you.
+> Pramaan: every verdict, with proof. Thank you.
 
 ---
 
-## Likely sawaal
+## Likely questions
 
-**Accuracy kitni hai?**
-> Abhi real documents pe measure nahi ki, isliye number nahi bolenge. Synthetic demo me sab cases pakde gaye, aur agla step real scans pe test karna hai.
+**What is your accuracy?**
+> We have not measured it on real documents yet, so we will not quote a number. Every case in our synthetic demo is caught, and testing on real scans is our next step.
 
-**AI galat padh le toh?**
-> Value tabhi rakhi jaati hai jab uski line document me ho aur numbers exact match karein. Warna officer ke paas jaati hai.
+**What if the AI reads something wrong?**
+> A value is kept only if its line is in the document and the numbers match exactly. Otherwise it goes to an officer.
 
-**Agar QR code hi na ho?**
-> Toh baaki checks chalte hain: PDF edits, font, signature, cross-document. Scan pe bina QR ke safai se ki gayi editing abhi nahi pakdi jaati, ye hamari known limit hai.
+**What if there is no QR code?**
+> The other checks still run: PDF edits, fonts, signatures and cross-document checks. A careful edit on a scan with no QR code is not caught yet. That is a known limit.
 
-**Land ka minimum check kyun nahi hai?**
-> Handbook 2024-27 me fixed acre nahi hai, land local FSI/FAR se decide hoti hai. Isliye hum built-up area check karte hain.
+**Why is there no minimum land check?**
+> The 2024-27 handbook has no fixed acreage. Land is decided by local FSI/FAR, so we check built-up area instead.
 
-**Data security?**
-> Local version me OCR aur saare rules server pe chalte hain. AI reader optional hai, offline mode me kuch bahar nahi jaata.
+**What about data security?**
+> In the local version, OCR and all rules run on the server. The AI reader is optional, and in offline mode nothing leaves the machine.
 
-**Dusre programmes?**
-> Faculty ratio saare UG programmes ke liye loaded hai. Room-wise area abhi Engineering UG ke liye hai, baaki human review me jaata hai.
+**What about other programmes?**
+> Faculty ratios are loaded for all UG programmes. Room-wise area is done for Engineering UG so far; the rest go to human review.
 
-**Ghost faculty me galat flag ho gaya toh?**
-> Faculty ID match pe based hai aur final decision officer ka hai, evidence uske saamne hota hai.
+**What if ghost faculty is flagged wrongly?**
+> It is based on matching faculty IDs, and the final decision is the officer's, with the evidence in front of them.
 
-**Sign wala check kitna strong hai?**
-> File sign ke baad badli toh pakad lete hain. Signer sahi office hai ya nahi, wo CCA root list maangta hai, jo abhi loaded nahi hai.
+**How strong is the signature check?**
+> We catch a file changed after signing. Confirming the signer is the right office needs the CCA root list, which is not loaded yet.
