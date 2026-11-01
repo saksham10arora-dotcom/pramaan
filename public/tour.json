@@ -7,7 +7,7 @@
 },
 "cap": "Pramaan",
 "say": "Good morning. Our problem statement is SIH26261 from AICTE: AI-powered application validation, document authentication and regulatory compliance verification. Our solution is Pramaan, which means proof.",
-"ms": 11600.0
+"ms": 11000.0
 },
 {
 "s": 1,
@@ -17,7 +17,7 @@
 },
 "cap": "Three problems",
 "say": "To get AICTE approval, every institution submits a land deed, a building certificate, a fire safety certificate and a faculty list, and officers read all of it by hand. That creates three problems. It is slow. An edited certificate looks genuine to the eye. And no officer can compare one college's faculty list against every other college.",
-"ms": 25300.0
+"ms": 23800.0
 },
 {
 "s": 1,
@@ -27,14 +27,14 @@
 },
 "cap": "One verdict, with proof",
 "say": "Pramaan reads the whole application and gives one of three verdicts: compliant, reject, or human review. Every finding shows the exact line of the document it came from. And wherever it is unsure, it does not approve on its own.",
-"ms": 18000.0
+"ms": 17000.0
 },
 {
 "s": 2,
 "pick": "clean",
 "cap": "A complete application",
 "say": "Let's see it live. This is a complete application from a fictional college, Shree Ram Institute of Technology. With one click, Pramaan reads every document and gives its verdict: compliant.",
-"ms": 13800.0
+"ms": 13000.0
 },
 {
 "s": 2,
@@ -44,7 +44,7 @@
 "glide": "student to faculty",
 "cap": "Faculty ratio from the AICTE handbook",
 "say": "Look at this check. There are 480 students and 25 faculty, which is 19.2 students per faculty member. The limit in Annexure 5 of the AICTE handbook is 20, so it passes. Below it is the exact line that number came from.",
-"ms": 18900.0
+"ms": 17800.0
 },
 {
 "s": 2,
@@ -54,56 +54,56 @@
 "glide": "built-up area",
 "cap": "Built-up area worked out room by room",
 "say": "The building area is not a guess either. It is calculated room by room from the tables in Annexure 3: classrooms, labs, library, all of it. The college needs 5,562 square metres, and its certificate shows 6,000.",
-"ms": 16700.0
+"ms": 15800.0
 },
 {
 "s": 2,
 "pick": "forged",
 "cap": "A forged fire certificate",
 "say": "Now a forgery. This college's fire certificate expired in March 2026, and the application is dated September 2026. So this should be rejected.",
-"ms": 10800.0
+"ms": 10200.0
 },
 {
 "s": 3,
 "glide": "img",
 "cap": "Expired date covered, new date typed on top",
 "say": "Someone placed a white box over the date and typed 2027. Look at the page. By eye it looks perfectly fine, and an officer could pass it. But Pramaan outlines in red exactly where it was changed.",
-"ms": 16700.0
+"ms": 15800.0
 },
 {
 "s": 3,
 "glide": "odd font",
 "cap": "White box, odd font, saved after issue",
 "say": "Pramaan caught the white box, the different font, and the fact that the file was saved again after it was issued. The real date is still in the file under the white box, and that is the date Pramaan reads.",
-"ms": 18000.0
+"ms": 17000.0
 },
 {
 "s": 3,
 "glide": "land owned",
 "cap": "Land is not in the trust's name",
 "say": "It also found that the land is in a private person's name, not the trust's. Pramaan matched two separate documents on its own to catch that.",
-"ms": 12100.0
+"ms": 11400.0
 },
 {
 "s": 3,
 "pick": "forged_scan",
 "cap": "Printed and scanned: no edit marks left",
 "say": "Now a smarter forger. They print the page and scan it, so no edit marks survive. There is no white box and no odd font. The page simply says 2027.",
-"ms": 13800.0
+"ms": 13000.0
 },
 {
 "s": 3,
 "glide": "QR code on",
 "cap": "The QR code still holds the true date",
 "say": "But the QR code still says 2026. Pramaan reads the QR code, compares it with the page, and rejects the application.",
-"ms": 9900.0
+"ms": 9400.0
 },
 {
 "s": 4,
 "pick": "ghost",
 "cap": "A second college. Every file looks fine.",
 "say": "Now the most important case. This is a different college, Ganga College of Engineering. Every document looks fine on its own. No edits, no expired dates.",
-"ms": 12100.0
+"ms": 11400.0
 },
 {
 "s": 4,
@@ -113,21 +113,21 @@
 "glide": "faculty at another",
 "cap": "25 faculty are already on another college's record",
 "say": "But Pramaan remembers earlier applications. These 25 faculty members are already listed by Shree Ram Institute. The same people are being shown at two colleges. This is called ghost faculty.",
-"ms": 13800.0
+"ms": 13000.0
 },
 {
 "s": 4,
 "glide": "reused document",
 "cap": "The fire certificate number is already in use",
 "say": "The fire certificate number is also the same one the first college submitted. You can never catch this by looking at one file.",
-"ms": 10800.0
+"ms": 10200.0
 },
 {
 "s": 4,
 "tab": "queue",
 "cap": "One queue, riskiest first",
 "say": "This is the officer's screen. All applications sit in one queue with the riskiest on top, and each has a PDF report with its evidence. There is also a REST API, so the AICTE portal can connect directly.",
-"ms": 17200.0
+"ms": 16200.0
 },
 {
 "s": 4,
@@ -137,7 +137,7 @@
 },
 "cap": "The pipeline",
 "say": "How does it work inside? Each document is read, using offline OCR if it is a scan. Then the norms are checked, the forgery checks run, and the registry compares it with earlier applications.",
-"ms": 15500.0
+"ms": 14600.0
 },
 {
 "s": 5,
@@ -147,7 +147,7 @@
 },
 "cap": "AI proposes. Code verifies.",
 "say": "Free-form letters are read by Gemini, but we do not simply trust it. A value is kept only if its source line is really in the document and the numbers match exactly. Otherwise it goes to an officer.",
-"ms": 17200.0
+"ms": 16200.0
 },
 {
 "s": 5,
@@ -157,7 +157,7 @@
 },
 "cap": "Built and running",
 "say": "This is not just an idea. The live link is running, 29 automated tests pass, and the norms come directly from the AICTE Approval Process Handbook 2024 to 27.",
-"ms": 13300.0
+"ms": 12600.0
 },
 {
 "s": 5,
@@ -167,7 +167,7 @@
 },
 "cap": "What it cannot do yet",
 "say": "We are also clear about our limits. So far we have tested only on synthetic documents, and real scans will be harder. And a very careful edit on a photo, with no QR code or signature, is not caught yet.",
-"ms": 18000.0
+"ms": 17000.0
 },
 {
 "s": 5,
@@ -177,7 +177,7 @@
 },
 "cap": "Who benefits",
 "say": "Officers spend their time on risky applications, honest colleges learn exactly what to fix, and students get real faculty and safe buildings.",
-"ms": 10400.0
+"ms": 9800.0
 },
 {
 "s": 5,
@@ -187,6 +187,6 @@
 },
 "cap": "Thank you",
 "say": "Pramaan: every verdict, with proof. Thank you.",
-"ms": 4000.0
+"ms": 3800.0
 }
 ]
