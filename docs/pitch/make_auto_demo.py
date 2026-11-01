@@ -4,7 +4,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent.parent.parent
 PATH = ROOT / "public" / "tour.json"
-WORDS_PER_SECOND = 2.35  # clear spoken English, a little slower than conversation
+WORDS_PER_SECOND = 2.5  # clear spoken English, 150 words a minute
 scenes = json.loads(PATH.read_text())
 for x in scenes:
     x["ms"] = round((len(x["say"].split()) / WORDS_PER_SECOND + 1) * 1000, -2)
