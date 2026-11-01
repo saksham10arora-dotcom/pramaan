@@ -24,8 +24,9 @@ blockquote{margin:8px 0;padding-left:10px;border-left:2px solid var(--line);colo
 details img{max-width:100%;border:1px solid var(--line);margin-top:8px}
 .tablewrap{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:560px}th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);font-size:15px}
 [hidden]{display:none!important}
-#cap{position:fixed;left:0;right:0;bottom:0;z-index:9;background:var(--navy);color:#fff;padding:18px 24px 22px;font:600 24px/1.3 Georgia,serif;text-align:center}
+#cap{position:fixed;left:0;right:0;bottom:0;z-index:11;background:var(--navy);color:#fff;padding:18px 24px 22px;font:600 24px/1.3 Georgia,serif;text-align:center}
 #cap i{position:absolute;left:0;top:0;height:4px;background:#7fb0ee;width:0}
+#cap b{position:absolute;right:16px;bottom:10px;font:600 13px Arial;color:#9db7da}
 #card{position:fixed;inset:0;z-index:10;background:var(--navy);color:#fff;display:flex;flex-direction:column;justify-content:center;padding:0 9vw}
 #card small{font:600 18px Arial;letter-spacing:2px;color:#9db7da}#card h1{font-size:88px;margin:14px 0}#card p{font:30px/1.35 Georgia,serif;max-width:900px;margin:0}
 #card button{align-self:flex-start;margin-top:32px;background:#fff;color:var(--navy);border:0;border-radius:6px;padding:14px 26px;font:700 20px Arial;cursor:pointer}
@@ -53,7 +54,7 @@ body.tour main{padding-bottom:130px}
 <p class="note">This web demo keeps its record for a short time only. The full version keeps a permanent database.</p></section>
 </main>
 <div id="card" hidden><small></small><h1>Pramaan</h1><p></p><button hidden>Start demo</button></div>
-<div id="cap" hidden><i></i><span></span></div>
+<div id="cap" hidden><i></i><span></span><b></b></div>
 <script>
 const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const cls={'FAIL':'FAIL','NEEDS REVIEW':'REVIEW','PASS':'PASS'},order=['FAIL','NEEDS REVIEW','PASS'];
@@ -78,30 +79,36 @@ async function tab(q){$('#t1').classList.toggle('on',!q);$('#t2').classList.togg
  $('#qt').innerHTML=r.length?`<table><tr><th>Institution</th><th>Verdict</th><th>Failed</th><th>Review</th><th>Passed</th><th>Report</th></tr>${r.map(a=>`<tr><td>${esc(a.institution)}</td><td>${esc(a.verdict)}</td><td>${a.failed}</td><td>${a.review}</td><td>${a.passed}</td><td><a href="/api/applications/${a.id}/report.pdf">PDF</a></td></tr>`).join('')}</table>`:'<p class="note">Nothing checked yet.</p>'}
 $('#t1').onclick=()=>tab(false);$('#t2').onclick=()=>tab(true);
 
-// Auto-demo: open /?tour=1, start the screen recording, press Start. It plays itself; speak over it.
-const wait=ms=>new Promise(r=>setTimeout(r,ms/SPEED)),SPEED=+new URLSearchParams(location.search).get('speed')||1;
+// Auto-demo: open /?tour=1, start the screen recording, press Start. It plays itself; speakers talk over it.
+// Space pauses and resumes. Scene timing and text live in tour.json, which also generates docs/pitch/AUTO_DEMO.md.
+const SPEED=+new URLSearchParams(location.search).get('speed')||1;let paused=false;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function card(small,line,button){const c=$('#card');c.hidden=false;c.querySelector('small').textContent=small;c.querySelector('p').textContent=line;c.querySelector('button').hidden=!button}
-async function caption(text,ms){$('#cap span').textContent=text;$('#cap').hidden=false;const bar=$('#cap i');bar.style.transition='none';bar.style.width='0';bar.offsetWidth;
- bar.style.transition=`width ${ms/SPEED}ms linear`;bar.style.width='100%';await wait(ms)}
-async function pick(name){const old=$('#out').innerHTML;$('#out').innerHTML='';document.querySelector(`[data-d=${name}]`).click();
- while(!$('#out .verdict'))await new Promise(r=>setTimeout(r,100));if(innerWidth>820)scrollTo({top:0,behavior:'smooth'})}
-const glide=el=>el&&el.scrollIntoView({behavior:'smooth',block:'center'});
-const find=text=>[...document.querySelectorAll('#out details')].find(d=>d.textContent.includes(text));
+async function hold(ms){const bar=$('#cap i');let done=0;while(done<ms){await sleep(100);if(paused)continue;done+=100*SPEED;bar.style.width=Math.min(100,done/ms*100)+'%'}}
+async function pick(name){$('#out').innerHTML='';document.querySelector(`[data-d=${name}]`).click();
+ while(!$('#out .verdict'))await sleep(100);if(innerWidth>820)scrollTo(0,0)}
+const finding=text=>[...document.querySelectorAll('#out details')].find(d=>d.textContent.includes(text));
+function roll(to){const from=scrollY,t0=performance.now(),i=setInterval(()=>{const k=Math.min(1,(performance.now()-t0)/900);
+ scrollTo(0,from+(to-from)*k*(2-k));if(k===1)clearInterval(i)},16)}
+function glide(what){if(what==='top')return roll(0);const el=what==='img'?$('#out details img'):finding(what);if(!el)return;
+ const r=el.getBoundingClientRect();roll(Math.max(0,scrollY+r.top-(innerHeight-90-r.height)/2))}
 async function tour(){
- document.body.classList.add('tour');
- card('SMART INDIA HACKATHON 2026 · SIH26261 · AICTE','Every AICTE application verdict, with proof.',false);await wait(7000);$('#card').hidden=true;
- await pick('clean');await caption('A complete application: read, checked against the handbook, verified in seconds',6000);
- find('student to faculty').open=true;find('built-up area').open=true;glide(find('student to faculty'));await caption('Every result quotes its source: faculty ratio, area worked out room by room',7000);
- await pick('forged');await caption('A forged fire certificate: expired date covered, new date typed on top',5000);
- glide($('#out details img'));await caption('Pramaan reads the real date underneath and shows exactly where it was covered',8000);
- await pick('forged_scan');await caption('Printed and scanned: no edit marks left. The QR code still holds the true date',9000);
- await pick('ghost');await caption('A second college: every file looks fine, but 25 faculty are already on record elsewhere',10000);
- $('#t2').click();await caption('Reviewers get one queue, riskiest first, with a report for every application',6000);
- $('#cap').hidden=true;card('EVERY VERDICT, WITH PROOF','AI proposes. Code verifies. Anything uncertain goes to a human, with the reason.',false);
+ document.body.classList.add('tour');addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();paused=!paused;$('#cap b').textContent=paused?'PAUSED':$('#cap b').dataset.n}});
+ const scenes=await(await fetch('/tour.json')).json();
+ for(const[i,x]of scenes.entries()){
+  if(x.card)card(x.card.small,x.card.line,false);else $('#card').hidden=true;
+  if(x.tab==='queue')$('#t2').click();
+  if(x.pick)await pick(x.pick);
+  (x.open||[]).forEach(t=>{const d=finding(t);if(d)d.open=true});
+  if(x.glide)glide(x.glide);
+  const n=$('#cap b');n.dataset.n=n.textContent=`${i+1}/${scenes.length}`;
+  $('#cap span').textContent=x.cap;$('#cap i').style.width='0';$('#cap').hidden=false;
+  await hold(x.ms);
+ }
 }
 if(new URLSearchParams(location.search).has('tour')){
  fetch('/api/demo/clean',{method:'POST'}); // wake the server so the first step is instant
- card('AUTO-DEMO','Start your screen recording, then press Start.',true);
+ card('AUTO-DEMO','Start your screen recording, then press Start. Space pauses.',true);
  $('#card button').onclick=tour;
 }
 </script></body></html>
