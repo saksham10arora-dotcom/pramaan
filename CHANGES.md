@@ -27,3 +27,4 @@ Every change from the prototype on, newest last.
 - Without OCR a scan goes to a human instead of rejecting the application as "missing". Demo scan text is cached in `pramaan/ocr_cache.json`.
 - API routes moved under `/api`.
 - **Pitch and auto-demo.** `/?tour=1` plays the demo by itself with captions for recording; Hinglish pitch script and voice-over script in `docs/pitch/`.
+- **Five-speaker auto-demo.** Tour is now 22 numbered scenes, about 5 minutes, with Space to pause. `public/tour.json` is the single source; `docs/pitch/make_auto_demo.py` times the scenes and writes AUTO_DEMO.md.
